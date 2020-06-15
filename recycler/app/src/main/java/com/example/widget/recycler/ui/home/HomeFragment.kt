@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.widget.recycler.databinding.FragmentHomeBinding
 import com.example.widget.recycler.ktx.autoClear
@@ -28,10 +29,13 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding.content.adapter = HomeAdapter(listOf("Hello", "Zzzz")) {
+        with(binding.content) {
+            adapter = HomeAdapter(listOf("Hello", "Zzzz")) {
 
+            }
+            layoutManager = LinearLayoutManager(context)
+            addItemDecoration(DividerItemDecoration(context, (layoutManager as LinearLayoutManager).orientation))
         }
-        binding.content.layoutManager = LinearLayoutManager(context!!)
     }
 
 }

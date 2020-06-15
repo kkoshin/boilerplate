@@ -2,21 +2,26 @@ package com.example.widget.recycler.ui.home
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
-import androidx.viewbinding.ViewBinding
-import com.example.widget.recycler.databinding.ItemBlankBinding
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import com.example.widget.recycler.HolderBinding
+import com.example.widget.recycler.databinding.ItemTextBinding
 
 class HomeAdapter(
     var data: List<String> = emptyList(),
     private val listener: (String) -> Unit
-) : RecyclerView.Adapter<ViewHolderAdapter<ItemBlankBinding>>() {
+) : ListAdapter<String, HolderBinding<ItemTextBinding>>(object : DiffUtil.ItemCallback<String?>() {
+    override fun areItemsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
+
+    override fun areContentsTheSame(oldItem: String, newItem: String): Boolean = oldItem == newItem
+}) {
 
     override fun onCreateViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): ViewHolderAdapter<ItemBlankBinding> {
-        return ViewHolderAdapter(
-            ItemBlankBinding.inflate(
+    ): HolderBinding<ItemTextBinding> {
+        return HolderBinding(
+            ItemTextBinding.inflate(
                 LayoutInflater.from(parent.context),
                 parent,
                 false
@@ -24,8 +29,16 @@ class HomeAdapter(
         )
     }
 
-    override fun onBindViewHolder(holder: ViewHolderAdapter<ItemBlankBinding>, position: Int) {
-        holder.B.txt.text = data[position]
+    override fun onBindViewHolder(holder: HolderBinding<ItemTextBinding>, position: Int) {
+        with(holder.delegate) {
+            txt.text = data[position]
+            container.setOnClickListener {
+                it.isEnabled = true
+                notifyItemChanged(holder.adapterPosition)
+            }
+            ivDrag.setOnClickListener {
+            }
+        }
     }
 
     override fun getItemCount(): Int {
@@ -33,5 +46,4 @@ class HomeAdapter(
     }
 }
 
-class ViewHolderAdapter<T : ViewBinding>(var B: T) : RecyclerView.ViewHolder(B.root)
 
