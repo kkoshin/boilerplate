@@ -7,12 +7,12 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import com.example.widget.recycler.databinding.FragmentNotificationsBinding
-import com.example.widget.recycler.ktx.autoClear
+import com.example.widget.recycler.ktx.autoUnbind
 
 class NotificationsFragment : Fragment() {
 
     private lateinit var notificationsViewModel: NotificationsViewModel
-    private var binding: FragmentNotificationsBinding by autoClear()
+    private var binding: FragmentNotificationsBinding by autoUnbind()
 
     override fun onCreateView(
         inflater: LayoutInflater,

@@ -9,12 +9,12 @@ import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.GridLayoutManager
 import com.example.widget.recycler.databinding.FragmentDashboardBinding
-import com.example.widget.recycler.ktx.autoClear
+import com.example.widget.recycler.ktx.autoUnbind
 
 class DashboardFragment : Fragment() {
 
     private lateinit var dashboardViewModel: DashboardViewModel
-    private var binding: FragmentDashboardBinding by autoClear()
+    private var binding: FragmentDashboardBinding by autoUnbind()
 
     override fun onCreateView(
         inflater: LayoutInflater,
