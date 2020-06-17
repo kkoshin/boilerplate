@@ -7,9 +7,13 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.*
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.example.widget.recycler.databinding.FragmentHomeBinding
 import com.example.widget.recycler.ktx.autoUnbind
+import java.util.*
 
 class HomeFragment : Fragment() {
 
@@ -30,9 +34,19 @@ class HomeFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         with(binding.content) {
-            adapter = HomeAdapter(listOf("Hello!!!", "Hahaha")) {
+            val homeAdapter = HomeAdapter(
+                mutableListOf(
+                    "Hello!!!",
+                    "Hahaha",
+                    "Hello!!!",
+                    "Hahaha",
+                    "Hello!!!",
+                    "Hahaha"
+                )
+            ) {
 
             }
+            adapter = homeAdapter
             layoutManager = LinearLayoutManager(context)
             addItemDecoration(
                 DividerItemDecoration(
@@ -40,6 +54,34 @@ class HomeFragment : Fragment() {
                     (layoutManager as LinearLayoutManager).orientation
                 )
             )
+            val touchHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(UP or DOWN, START) {
+                override fun onMove(
+                    recyclerView: RecyclerView,
+                    viewHolder: RecyclerView.ViewHolder,
+                    target: RecyclerView.ViewHolder
+                ): Boolean {
+                    Collections.swap(
+                        homeAdapter.data,
+                        viewHolder.adapterPosition,
+                        target.adapterPosition
+                    )
+                    homeAdapter.notifyItemMoved(viewHolder.adapterPosition, target.adapterPosition)
+                    return true
+                }
+
+                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
+                    homeAdapter.data.removeAt(viewHolder.adapterPosition)
+                    homeAdapter.notifyItemRemoved(viewHolder.adapterPosition)
+                }
+
+                override fun isLongPressDragEnabled(): Boolean {
+                    return false
+                }
+            }).also {
+                it.attachToRecyclerView(this)
+            }
+
+            homeAdapter.touchHelper = touchHelper
         }
     }
 }
