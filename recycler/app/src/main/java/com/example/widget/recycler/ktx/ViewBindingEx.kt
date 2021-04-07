@@ -6,6 +6,10 @@ import androidx.viewbinding.ViewBinding
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
+/**
+ * 不可见并没有生效
+ * @hide
+ */
 fun <T : ViewBinding> Fragment.autoUnbind(): ReadWriteProperty<Fragment, T> =
     object : ReadWriteProperty<Fragment, T>, LifecycleObserver {
         private var holder: T? = null
