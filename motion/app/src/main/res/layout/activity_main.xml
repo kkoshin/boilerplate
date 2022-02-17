@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?><!-- activity_main.xml -->
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ml"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layoutDescription="@xml/activity_main_scene"
+    tools:showPaths="true">
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:background="@color/design_default_color_primary"
+        android:text="Swipe the screen"
+        android:textColor="@color/design_default_color_on_primary" />
+
+    <Button
+        android:id="@+id/play"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/design_default_color_secondary"
+        android:text="PLAY"
+        android:textColor="@color/design_default_color_on_secondary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
+</androidx.constraintlayout.motion.widget.MotionLayout>

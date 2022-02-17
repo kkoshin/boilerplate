@@ -4,28 +4,44 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
-import com.example.widget.recycler.R
+import androidx.recyclerview.widget.DividerItemDecoration
+import androidx.recyclerview.widget.GridLayoutManager
+import com.example.widget.recycler.databinding.FragmentDashboardBinding
+import com.example.widget.recycler.ktx.autoUnbind
 
 class DashboardFragment : Fragment() {
 
     private lateinit var dashboardViewModel: DashboardViewModel
+    private var binding: FragmentDashboardBinding by autoUnbind()
 
     override fun onCreateView(
-            inflater: LayoutInflater,
-            container: ViewGroup?,
-            savedInstanceState: Bundle?
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
     ): View? {
         dashboardViewModel =
-                ViewModelProviders.of(this).get(DashboardViewModel::class.java)
-        val root = inflater.inflate(R.layout.fragment_dashboard, container, false)
-        val textView: TextView = root.findViewById(R.id.text_dashboard)
-        dashboardViewModel.text.observe(viewLifecycleOwner, Observer {
-            textView.text = it
-        })
-        return root
+            ViewModelProviders.of(this).get(DashboardViewModel::class.java)
+        binding = FragmentDashboardBinding.inflate(inflater, container, false)
+        return binding.root
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        with(binding.content) {
+            adapter = DashboardAdapter(listOf(
+                "Hello", "Zzzz", "Hello", "Zzzz", "Hello", "Zzzz",
+                "Hello", "Zzzz", "Hello", "Zzzz", "Hello", "Zzzz",
+                "Hello", "Zzzz", "Hello", "Zzzz", "Hello", "Zzzz"
+            ))
+            layoutManager = GridLayoutManager(context, 5)
+            addItemDecoration(
+                DividerItemDecoration(
+                    context,
+                    (layoutManager as GridLayoutManager).orientation
+                )
+            )
+        }
     }
 }
