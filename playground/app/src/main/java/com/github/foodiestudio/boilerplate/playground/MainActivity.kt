@@ -13,12 +13,4 @@ class MainActivity : AppCompatActivity() {
             .add(R.id.content, TouchExamFragment.newInstance())
             .commit()
     }
-
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        return super.dispatchTouchEvent(ev)
-    }
-
-    override fun onTouchEvent(event: MotionEvent?): Boolean {
-        return super.onTouchEvent(event)
-    }
 }

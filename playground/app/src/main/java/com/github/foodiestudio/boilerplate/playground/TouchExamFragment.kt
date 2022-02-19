@@ -1,18 +1,22 @@
 package com.github.foodiestudio.boilerplate.playground
 
 import android.annotation.SuppressLint
+import android.app.ActivityOptions
+import android.content.Intent
+import android.graphics.Rect
 import android.os.Build
 import android.os.Bundle
-import android.view.MotionEvent
+import android.view.*
 import android.view.MotionEvent.AXIS_X
 import android.view.MotionEvent.AXIS_Y
-import android.view.View
-import android.view.ViewConfiguration
+import android.widget.CheckBox
 import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.OverScroller
 import androidx.annotation.RequiresApi
 import androidx.core.view.ViewConfigurationCompat
 import androidx.fragment.app.Fragment
+import com.github.foodiestudio.boilerplate.playground.custom.PhotoView
 import com.github.foodiestudio.boilerplate.playground.utils.log
 import com.github.foodiestudio.sugar.toDp
 
@@ -21,12 +25,15 @@ import com.github.foodiestudio.sugar.toDp
  */
 class TouchExamFragment : Fragment(R.layout.frag_touch_exam) {
 
-    lateinit var target: ImageView
+    private lateinit var target: ImageView
+    private lateinit var pvDetector: ImageView
+
+    private lateinit var cb: CheckBox
+    private lateinit var ll: LinearLayout
 
     private var startX: Float = 0F
     private var startY: Float = 0F
 
-//    private var mSlop: Int = 0
 
     private val scroller: OverScroller by lazy { OverScroller(context) }
 
@@ -39,29 +46,34 @@ class TouchExamFragment : Fragment(R.layout.frag_touch_exam) {
         return (x - startX) to (y - startY)
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        target = view.findViewById(R.id.iv_target)
 
-//        mSlop = ViewConfiguration.get(context).scaledTouchSlop
+        target = view.findViewById(R.id.iv_target)
+        ll = view.findViewById(R.id.ll_touch_delegate)
+        cb = view.findViewById(R.id.cb)
+        pvDetector = view.findViewById(R.id.pv)
+
+        view.viewTreeObserver.addOnGlobalLayoutListener {
+            setupTouchDelegate()
+        }
+
+        pvDetector.setOnClickListener {
+            PhotoPreviewActivity.start(
+                requireContext(), ActivityOptions
+                    .makeSceneTransitionAnimation(activity, pvDetector, "007")
+            )
+        }
+
+        setupCustomTouchEvent()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun setupCustomTouchEvent() {
         target.setOnTouchListener { v, event ->
             val mode = when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     reset(event.x, event.y)
-//                    log(
-//                        """
-//                        已知
-//                            ● ViewGroup：paddingTop = 2dp
-//                                ○ ImageView: paddingTop = 4dp, marginTop = 8dp
-//
-//                        那么 ImageView 的
-//                            top: ${v.top.toDp()}
-//                            Y: ${v.y.toDp()}
-//                            rotationX: ${v.rotationX}
-//                            rotationY: ${v.rotationY}
-//                    """.trimIndent()
-//                    )
                     "down"
                 }
                 MotionEvent.ACTION_POINTER_DOWN -> {
@@ -103,6 +115,17 @@ class TouchExamFragment : Fragment(R.layout.frag_touch_exam) {
             }
             mode == "down"
         }
+    }
+
+    private fun setupTouchDelegate() {
+        log(
+            """
+                ll.top: ${ll.clipBounds?.top}
+                ll.bottom: ${ll.clipBounds?.bottom}
+            """.trimIndent()
+        )
+        val rect = Rect(ll.left, ll.top, ll.right, ll.bottom)
+        ll.touchDelegate = TouchDelegate(rect, cb)
     }
 
     /**
