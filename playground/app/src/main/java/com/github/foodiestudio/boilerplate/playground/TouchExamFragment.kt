@@ -2,9 +2,7 @@ package com.github.foodiestudio.boilerplate.playground
 
 import android.annotation.SuppressLint
 import android.app.ActivityOptions
-import android.content.Intent
 import android.graphics.Rect
-import android.os.Build
 import android.os.Bundle
 import android.view.*
 import android.view.MotionEvent.AXIS_X
@@ -13,11 +11,8 @@ import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.OverScroller
-import androidx.annotation.RequiresApi
-import androidx.core.view.ViewConfigurationCompat
 import androidx.fragment.app.Fragment
-import com.github.foodiestudio.boilerplate.playground.custom.PhotoView
-import com.github.foodiestudio.boilerplate.playground.utils.log
+import com.github.foodiestudio.boilerplate.playground.utils.logcat
 import com.github.foodiestudio.sugar.toDp
 
 /**
@@ -98,7 +93,7 @@ class TouchExamFragment : Fragment(R.layout.frag_touch_exam) {
              * rawX, rawY 则是以最外面的 Window？的左上角作为坐标轴中心
              */
             event.apply {
-                log(
+                logcat {
                     """
                     =================
                     mode: $mode
@@ -110,7 +105,7 @@ class TouchExamFragment : Fragment(R.layout.frag_touch_exam) {
                     Axis_Y: ${getAxisValue(AXIS_Y).toDp()}
                     =================
                 """.trimIndent()
-                )
+                }
 
             }
             mode == "down"
@@ -118,12 +113,12 @@ class TouchExamFragment : Fragment(R.layout.frag_touch_exam) {
     }
 
     private fun setupTouchDelegate() {
-        log(
+        logcat {
             """
                 ll.top: ${ll.clipBounds?.top}
                 ll.bottom: ${ll.clipBounds?.bottom}
             """.trimIndent()
-        )
+        }
         val rect = Rect(ll.left, ll.top, ll.right, ll.bottom)
         ll.touchDelegate = TouchDelegate(rect, cb)
     }
