@@ -22,6 +22,14 @@
         <activity
             android:name=".PhotoPreviewActivity"
             android:theme="@style/Theme.Playground.Activity" />
+
+        <service
+            android:name=".aidl.AidlRemoteService"
+            android:process=":haha" />
+
+        <activity
+            android:name=".aidl.ClientActivity"
+            android:exported="true"></activity>
     </application>
 
 </manifest>

@@ -5,6 +5,8 @@ import android.util.Log
 
 const val TAG = "NULL"
 
-fun logcat(tag: String = TAG, msg: () -> String) {
-    Log.d(tag, msg.invoke())
+fun logcat(tag: String = TAG, msg: () -> String?) {
+    msg.invoke()?.let {
+        Log.d(tag, it)
+    }
 }
