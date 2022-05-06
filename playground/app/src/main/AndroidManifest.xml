@@ -12,16 +12,23 @@
         <activity
             android:name=".MainActivity"
             android:exported="true">
+
+        </activity>
+
+        <activity
+            android:name=".PhotoPreviewActivity"
+            android:configChanges="orientation|screenSize"
+            android:theme="@style/Theme.Playground.Activity" />
+
+        <activity
+            android:name=".RotateActivity"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".PhotoPreviewActivity"
-            android:theme="@style/Theme.Playground.Activity" />
 
         <service
             android:name=".aidl.AidlRemoteService"
