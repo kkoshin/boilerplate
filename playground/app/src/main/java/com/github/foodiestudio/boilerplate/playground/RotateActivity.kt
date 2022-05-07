@@ -54,6 +54,8 @@ class RotateActivity : ComponentActivity(R.layout.activity_rotate) {
     private var offsetX = 0f
     private var offsetY = 0f
 
+    private var deltaMarginLeft = 0f
+
     private val mClockWise = false
 
     @SuppressLint("ClickableViewAccessibility")
@@ -80,9 +82,11 @@ class RotateActivity : ComponentActivity(R.layout.activity_rotate) {
         findViewById<Button>(R.id.btn_xxx).setOnClickListener {
             contentView.updateLayoutParams {
                 if (rotated) {
-                    height += _16dp
-                    contentView.translationX -= _16dp / 2
-                    contentView.translationY -= _16dp / 2
+                    val dX = if (mClockWise) _16dp else -_16dp
+                    deltaMarginLeft += dX
+                    height += dX
+                    contentView.translationX -= dX / 2
+                    contentView.translationY -= dX / 2
                 }
             }
         }
@@ -109,7 +113,7 @@ class RotateActivity : ComponentActivity(R.layout.activity_rotate) {
      * - 视觉上的缩放大小
      *   1. 调整高度
      *      - 默认：可以
-     *      - 旋转后：实际上对应的是调整宽度，然后需要加一定的translation 做抵消，因为中心点变了 TODO 恢复到竖屏后，左边宽度有点变小了
+     *      - 旋转后：实际上对应的是调整宽度，然后需要加一定的translation 做抵消，因为中心点变了
      *   2. 调整宽度,默认是match_parent
      *      - 默认：调整 marginRight 为主
      *      - 旋转后：调整 height,然后加上 translation 做补偿
@@ -126,6 +130,8 @@ class RotateActivity : ComponentActivity(R.layout.activity_rotate) {
                 height += dX.roundToInt()
                 contentView.translationX -= dX / 2
                 contentView.translationY -= dX / 2
+                // 竖屏情况下，宽度match_parent,需要通过修改对应的 margin 来达到对应的视觉效果
+                deltaMarginLeft += dX.roundToInt()
             } else {
                 height += deltaY.roundToInt()
                 // 这里要用 updateMarginsRelative，不能是 updateMargins
@@ -155,12 +161,18 @@ class RotateActivity : ComponentActivity(R.layout.activity_rotate) {
             rotation = 0f
             translationX = offsetX
             translationY = offsetY
-            layoutParams.apply {
+            updateLayoutParams {
                 height = width // ViewGroup.LayoutParams.WRAP_CONTENT
                 width = 0 // constraint 约束
+                (this as ViewGroup.MarginLayoutParams).updateMarginsRelative(
+                    start = leftMargin - deltaMarginLeft.toInt()
+                )
             }
-            requestLayout()
+            invalidate()
         }
+        offsetX = 0f
+        offsetY = 0f
+        deltaMarginLeft = 0f
     }
 
     /**
@@ -212,7 +224,7 @@ class RotateActivity : ComponentActivity(R.layout.activity_rotate) {
     }
 }
 
-class SimpleDistanceChangeListener(
+private class SimpleDistanceChangeListener(
     private val onChange: (Float, Float) -> Unit
 ) : View.OnTouchListener {
     private var downX = 0f
