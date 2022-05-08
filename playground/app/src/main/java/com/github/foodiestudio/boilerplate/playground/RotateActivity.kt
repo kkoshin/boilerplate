@@ -2,6 +2,7 @@ package com.github.foodiestudio.boilerplate.playground
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
+import android.graphics.Rect
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
@@ -11,6 +12,8 @@ import androidx.activity.ComponentActivity
 import androidx.core.view.*
 import com.github.foodiestudio.boilerplate.playground.utils.ScreenUtil
 import com.github.foodiestudio.boilerplate.playground.utils.logcat
+import com.github.foodiestudio.sugar.dp
+import com.github.foodiestudio.sugar.toDp
 import kotlin.math.abs
 import kotlin.math.roundToInt
 
@@ -41,6 +44,7 @@ class RotateActivity : ComponentActivity(R.layout.activity_rotate) {
     private val _16dp by lazy { ScreenUtil.getPX(this, 16f) }
 
     private val screenWidth by lazy { ScreenUtil.getScreenSize(this).x }
+    private val screenHeight by lazy { ScreenUtil.getScreenSize(this).y }
 
     private var marginsArray: IntArray = intArrayOf(1, 2, 3, 4) // top, end, bottom, start
     private var indexOffset = 0
@@ -57,6 +61,16 @@ class RotateActivity : ComponentActivity(R.layout.activity_rotate) {
     private var deltaMarginLeft = 0f
 
     private val mClockWise = false
+
+    private val width = 302.dp.toInt()
+    private val height = 200.dp.toInt()
+
+    private val initRect: Rect = Rect().apply {
+        left = 30.dp.toInt()
+        top = 100.dp.toInt()
+        right = 30.dp.toInt() + width
+        bottom = 100.dp.toInt() + height
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,31 +94,124 @@ class RotateActivity : ComponentActivity(R.layout.activity_rotate) {
         indexOffset = 0
 
         findViewById<Button>(R.id.btn_xxx).setOnClickListener {
-            contentView.updateLayoutParams {
-                if (rotated) {
-                    val dX = if (mClockWise) _16dp else -_16dp
-                    deltaMarginLeft += dX
-                    height += dX
-                    contentView.translationX -= dX / 2
-                    contentView.translationY -= dX / 2
+//            contentView.updateLayoutParams {
+//                if (rotated) {
+//                    val dX = if (mClockWise) _16dp else -_16dp
+//                    deltaMarginLeft += dX
+//                    height += dX
+//                    contentView.translationX -= dX / 2
+//                    contentView.translationY -= dX / 2
+//                }
+//            }
+
+            with(contentView) {
+                logcat("NULL") {
+                    """
+                    bounds:
+                    width: ${width.toDp()},
+                    height: ${height.toDp()}
+                    x, y: ${x.toDp()}, ${y.toDp()}
+                    translateX, translateY: ${translationX.toDp()}, ${translationY.toDp()} 
+                    left, top : ${left.toDp()}, ${top.toDp()}
+                    right, bottom : ${right.toDp()}, ${bottom.toDp()}
+                    ===========================
+                    offsetX: ${offsetX.toDp()}
+                    offsetY: ${offsetY.toDp()}
+                    ===========================
+                """.trimIndent()
                 }
             }
+
+//            findViewById<View>(R.id.view_guideline).apply {
+//                val rect = Rect()
+//                getDrawingRect(rect)
+//                val locationInWindow = IntArray(2)
+//                getLocationInWindow(locationInWindow)
+//                with(rect) {
+//                    logcat("NULL") {
+//                        """
+//                    bounds:
+//                    width: ${width.toDp()},
+//                    height: ${height.toDp()}
+//                    x, y: ${x.toDp()}, ${y.toDp()}
+//                    left, top : ${left.toDp()}, ${top.toDp()}
+//                    right, bottom : ${right.toDp()}, ${bottom.toDp()}
+//                """.trimIndent()
+//                    }
+//                    logcat("NULL") {
+//                        """
+//                    location:
+//                     x, y: ${locationInWindow[0].toDp()}, ${locationInWindow[1].toDp()}
+//                """.trimIndent()
+//                    }
+//                }
+//            }
         }
 
         resizeButton.setOnTouchListener(SimpleDistanceChangeListener(onChange = { dx, dy ->
             resize(dx, dy, mClockWise)
         }))
-        moveButton.setOnTouchListener(SimpleDistanceChangeListener(onChange = {dx, dy ->
-            move(dx, dy)
+        moveButton.setOnTouchListener(SimpleDistanceChangeListener(onChange = { deltaX, deltaY ->
+            val maxWidth = screenWidth
+            val maxHeight = screenHeight
+
+            if (!rotated) {
+                val leftSpace = contentView.x
+                val rightSpace = maxWidth - contentView.x - contentView.width
+                val topSpace = contentView.y
+                val bottomSpace = maxHeight - contentView.y - contentView.height
+                move(
+                    deltaX.coerceIn(-leftSpace, rightSpace),
+                    deltaY.coerceIn(-topSpace, bottomSpace)
+                )
+            } else {
+                if (mClockWise) {
+                    // todo 类似计算的方式
+//                    move(
+//                        deltaX.coerceIn(-topSpace, bottomSpace),
+//                        deltaY.coerceIn(-rightSpace, leftSpace)
+//                    )
+                } else {
+                    // TODO: 发生缩放后，边界判断还是有点问题
+                    val x_ = contentView.x + (width + height) / 2
+                    val y_ = contentView.y + (width - height) / 2
+                    val rightSpace = maxWidth - x_
+                    val leftSpace = maxWidth - rightSpace - contentView.height
+                    val topSpace = y_
+                    val bottomSpace = maxHeight - topSpace - contentView.width
+
+                    move(
+                        deltaX.coerceIn(-leftSpace, rightSpace),
+                        deltaY.coerceIn(-topSpace, bottomSpace)
+                    )
+                }
+
+            }
         }))
+
+        initSize()
     }
 
-    private fun move(deltaX: Float, deltaY: Float) {
-        offsetX += deltaX
-        offsetY += deltaY
+    private fun initSize() {
+        contentView.updateLayoutParams {
+            width = 0
+            height = initRect.height()
+            (this as ViewGroup.MarginLayoutParams).updateMarginsRelative(
+                top = initRect.top,
+                start = initRect.left,
+                end = screenWidth - initRect.right,
+                bottom = screenHeight - initRect.bottom
+            )
+        }
+        contentView.invalidate()
+    }
+
+    private fun move(dx: Float, dy: Float) {
+        offsetX += dx
+        offsetY += dy
         contentView.apply {
-            translationX += deltaX
-            translationY += deltaY
+            translationX += dx
+            translationY += dy
         }
     }
 
