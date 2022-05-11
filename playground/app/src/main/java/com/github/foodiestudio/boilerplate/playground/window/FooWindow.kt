@@ -9,6 +9,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.core.view.updateMarginsRelative
 import com.github.foodiestudio.boilerplate.playground.databinding.ContentDialogBinding
 import com.github.foodiestudio.boilerplate.playground.databinding.DialogOverlayFooBinding
+import com.github.foodiestudio.boilerplate.playground.utils.ScreenUtil
 import com.github.foodiestudio.boilerplate.playground.utils.logcat
 import com.github.foodiestudio.sugar.dp
 import com.github.foodiestudio.sugar.toDp
@@ -29,35 +30,80 @@ class FooWindow(
             dismiss()
         }
 
-        viewBinding.imageButtonResize.setOnTouchListener(SimpleDistanceChangeListener { dx, dy ->
-            logcat {
-                """before click:
+        viewBinding.imageButtonResize.setOnTouchListener(
+            SimpleDistanceChangeListener(
+                onPreChange = {
+                    // 临时扩大window范围，这样可以尽可能减少window边框更新
+                    viewBinding.ll.updateLayoutParams {
+                        width = mLayoutParams.width
+                        height = mLayoutParams.height
+                    }
+                    mLayoutParams.width = ScreenUtil.getScreenSize(context).x - mLayoutParams.x
+                    // FIXME 注意这里不能越界，不然会导致window的往上漂移
+                    mLayoutParams.height = ScreenUtil.getScreenRealSize(context).y - mLayoutParams.y - 100.dp.toInt()
+                    invalidateView()
+                },
+                onChangeEnd = {
+                    mLayoutParams.width = viewBinding.ll.width
+                    mLayoutParams.height = viewBinding.ll.height
+                    invalidateView()
+                },
+                onChange = { dx, dy ->
+                    logcat {
+                        """before resize:
                     (x, y): ${mLayoutParams.x.toDp()}, ${mLayoutParams.y.toDp()}
                     width : ${mLayoutParams.width.toDp()}
                     height: ${mLayoutParams.height.toDp()}
                 """.trimIndent()
-            }
-            updateWindowSize(dx, dy)
-            logcat {
-                """after resize dx, dy: ${dx.toDp()}, ${dy.toDp()}
+                    }
+                    viewBinding.ll.updateLayoutParams {
+                        width += dx.toInt()
+                        height += dy.toInt()
+                    }
+                    logcat {
+                        """after resize dx, dy: ${dx.toDp()}, ${dy.toDp()}
                     (x, y): ${mLayoutParams.x.toDp()}, ${mLayoutParams.y.toDp()}
                     width : ${mLayoutParams.width.toDp()}
                     height: ${mLayoutParams.height.toDp()}
                 """.trimIndent()
-            }
-        })
+                    }
+                })
+        )
 
         viewBinding.btnXxx.setOnClickListener {
             val dx = 10.dp
             val dy = 0.dp
             logcat {
-                """before click:
+                """before click(window):
                     (x, y): ${mLayoutParams.x.toDp()}, ${mLayoutParams.y.toDp()}
                     width : ${mLayoutParams.width.toDp()}
                     height: ${mLayoutParams.height.toDp()}
                 """.trimIndent()
             }
-            updateWindowSize(dx, dy)
+
+            val v = viewBinding.ll
+            logcat {
+                """before click(view):
+                    (x, y): ${v.x.toDp()}, ${v.y.toDp()}
+                    width : ${v.width.toDp()}
+                    height: ${v.height.toDp()}
+                """.trimIndent()
+            }
+            v.updateLayoutParams {
+                width = mLayoutParams.width
+                height = mLayoutParams.height
+            }
+            mLayoutParams.width = ScreenUtil.getScreenSize(context).x - mLayoutParams.x
+            mLayoutParams.height = ScreenUtil.getScreenSize(context).y - mLayoutParams.y - 50.dp.toInt()
+            invalidateView()
+//            updateWindowSize(dx, dy)
+            logcat {
+                """after click(view):
+                    (x, y): ${v.x.toDp()}, ${v.y.toDp()}
+                    width : ${v.width.toDp()}
+                    height: ${v.height.toDp()}
+                """.trimIndent()
+            }
             logcat {
                 """after resize dx, dy: ${dx.toDp()}, ${dy.toDp()}
                     (x, y): ${mLayoutParams.x.toDp()}, ${mLayoutParams.y.toDp()}
@@ -85,7 +131,7 @@ class FooWindow(
         }
     }
 
-    val lastWidth : Int = 0
+    val lastWidth: Int = 0
 
     private fun rotate(archerToTop: Boolean = true, clockWise: Boolean = false) {
         // 因为视图原本的 h 不参与计算，以及 margin 也不会，所以在调整窗口大小以及位置的时候，尽量调整这些参数

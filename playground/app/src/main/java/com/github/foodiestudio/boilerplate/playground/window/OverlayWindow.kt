@@ -36,8 +36,8 @@ open class OverlayWindow<T : ViewBinding>(
         }
         flags =
             WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-//        format = PixelFormat.TRANSLUCENT
-        dimAmount = 0.8f
+        format = PixelFormat.TRANSLUCENT
+//        dimAmount = 0.8f
     }
 
     init {
