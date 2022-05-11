@@ -12,7 +12,13 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.OverScroller
 import androidx.fragment.app.Fragment
+import com.github.foodiestudio.boilerplate.playground.databinding.ContentDialogBinding
+import com.github.foodiestudio.boilerplate.playground.databinding.DialogOverlayFooBinding
+import com.github.foodiestudio.boilerplate.playground.utils.IOverlayDialog
+import com.github.foodiestudio.boilerplate.playground.utils.OverlayWindows
 import com.github.foodiestudio.boilerplate.playground.utils.logcat
+import com.github.foodiestudio.boilerplate.playground.utils.toast
+import com.github.foodiestudio.sugar.dp
 import com.github.foodiestudio.sugar.toDp
 
 /**
@@ -31,6 +37,17 @@ class TouchExamFragment : Fragment(R.layout.frag_touch_exam) {
 
 
     private val scroller: OverScroller by lazy { OverScroller(context) }
+
+    private val dialog: IOverlayDialog by lazy {
+        OverlayWindows.createFoo(requireContext(), onClick = {
+
+        }) {
+            x = 20.dp.toInt()
+            y = 100.dp.toInt()
+            width = 350.dp.toInt()
+            height = 500.dp.toInt()
+        }
+    }
 
     private fun reset(x: Float, y: Float) {
         startX = x
@@ -60,7 +77,15 @@ class TouchExamFragment : Fragment(R.layout.frag_touch_exam) {
             )
         }
 
-        setupCustomTouchEvent()
+        showDialog()
+//        setupCustomTouchEvent()
+    }
+
+    private fun showDialog() {
+        target.setOnClickListener {
+            it.context.toast { "show overlay dialog" }
+            dialog.show()
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")

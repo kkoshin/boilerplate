@@ -12,6 +12,7 @@ import androidx.activity.ComponentActivity
 import androidx.core.view.*
 import com.github.foodiestudio.boilerplate.playground.utils.ScreenUtil
 import com.github.foodiestudio.boilerplate.playground.utils.logcat
+import com.github.foodiestudio.boilerplate.playground.window.SimpleDistanceChangeListener
 import com.github.foodiestudio.sugar.dp
 import com.github.foodiestudio.sugar.toDp
 import kotlin.math.abs
@@ -328,32 +329,5 @@ class RotateActivity : ComponentActivity(R.layout.activity_rotate) {
                 duration = 300
                 start()
             }
-    }
-}
-
-private class SimpleDistanceChangeListener(
-    private val onChange: (Float, Float) -> Unit
-) : View.OnTouchListener {
-    private var downX = 0f
-    private var downY = 0f
-
-    @SuppressLint("ClickableViewAccessibility")
-    override fun onTouch(v: View, motionEvent: MotionEvent): Boolean {
-        when (motionEvent.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                downX = motionEvent.rawX
-                downY = motionEvent.rawY
-            }
-            MotionEvent.ACTION_MOVE -> {
-                val deltaX = motionEvent.rawX - downX
-                val deltaY = motionEvent.rawY - downY
-                downX = motionEvent.rawX
-                downY = motionEvent.rawY
-                onChange(deltaX, deltaY)
-            }
-            MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP -> {
-            }
-        }
-        return true
     }
 }
