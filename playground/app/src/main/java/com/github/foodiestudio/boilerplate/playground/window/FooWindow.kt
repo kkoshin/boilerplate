@@ -25,10 +25,23 @@ class FooWindow(
     ), initParams
 ) {
 
+    private var mClockWise: Boolean? = null
+
     init {
         viewBinding.imageButtonClose.setOnClickListener {
             dismiss()
         }
+
+//        viewBinding.imageButtonResize.setOnTouchListener(
+//            SimpleDistanceChangeListener(
+//                onChange = { dx, dy ->
+//                    if (mClockWise == null) {
+//                        return@SimpleDistanceChangeListener
+//                    }
+//                    resize(dx, dy, mClockWise!!)
+//                }
+//            )
+//        )
 
         viewBinding.imageButtonResize.setOnTouchListener(
             SimpleDistanceChangeListener(
@@ -40,7 +53,8 @@ class FooWindow(
                     }
                     mLayoutParams.width = ScreenUtil.getScreenSize(context).x - mLayoutParams.x
                     // FIXME 注意这里不能越界，不然会导致window的往上漂移
-                    mLayoutParams.height = ScreenUtil.getScreenRealSize(context).y - mLayoutParams.y - 100.dp.toInt()
+                    mLayoutParams.height =
+                        ScreenUtil.getScreenSize(context).y - mLayoutParams.y
                     invalidateView()
                 },
                 onChangeEnd = {
@@ -89,13 +103,15 @@ class FooWindow(
                     height: ${v.height.toDp()}
                 """.trimIndent()
             }
-            v.updateLayoutParams {
-                width = mLayoutParams.width
-                height = mLayoutParams.height
-            }
-            mLayoutParams.width = ScreenUtil.getScreenSize(context).x - mLayoutParams.x
-            mLayoutParams.height = ScreenUtil.getScreenSize(context).y - mLayoutParams.y - 50.dp.toInt()
-            invalidateView()
+            resizeInLandscape(dx, dy, mClockWise ?: false)
+//            v.updateLayoutParams {
+//                width = mLayoutParams.width
+//                height = mLayoutParams.height
+//            }
+//            mLayoutParams.width = ScreenUtil.getScreenSize(context).x - mLayoutParams.x
+//            mLayoutParams.height =
+//                ScreenUtil.getScreenSize(context).y - mLayoutParams.y - 50.dp.toInt()
+//            invalidateView()
 //            updateWindowSize(dx, dy)
             logcat {
                 """after click(view):
@@ -114,7 +130,7 @@ class FooWindow(
         }
 
         viewBinding.imageButtonRotate.setOnClickListener {
-            rotate()
+            rotate(true, false)
 //            viewBinding.ll.updateLayoutParams {
 //                height = 400.dp.toInt()
 //            }
@@ -131,9 +147,50 @@ class FooWindow(
         }
     }
 
+    private val maxWidth: Int by lazy { ScreenUtil.getScreenSize(context).x }
+    private val maxHeight: Int by lazy { ScreenUtil.getScreenSize(context).y }
+
+    private val leftSpace: Int
+        get() = mLayoutParams.x
+
+    private val topSpace: Int
+        get() = mLayoutParams.y
+
+    private val rightSpace: Int
+        get() = maxWidth - leftSpace - mLayoutParams.width
+
+    private val bottomSpace: Int
+        get() = maxHeight - topSpace - mLayoutParams.height
+
+
+    private fun resizeInLandscape(dx: Float, dy: Float, clockWise: Boolean = false) {
+        if (clockWise) {
+            mLayoutParams.y += dy.toInt()
+            mLayoutParams.height -= dy.toInt()
+            mLayoutParams.width += dx.toInt()
+        } else {
+            mLayoutParams.height += dy.toInt()
+            mLayoutParams.x += dx.toInt()
+            mLayoutParams.width -= dx.toInt()
+        }
+        viewBinding.ll.apply {
+            val h_ = if (clockWise) dx else -dx
+            val w_ = if (clockWise) -dy else dy
+            translationY += ((w_ - h_) / 2).toInt()
+            translationX += ((h_ - w_) / 2).toInt()
+            updateLayoutParams {
+                width += w_.toInt()
+                height += h_.toInt()
+            }
+            invalidate()
+        }
+        invalidateView()
+    }
+
     val lastWidth: Int = 0
 
     private fun rotate(archerToTop: Boolean = true, clockWise: Boolean = false) {
+        mClockWise = clockWise
         // 因为视图原本的 h 不参与计算，以及 margin 也不会，所以在调整窗口大小以及位置的时候，尽量调整这些参数
         val contentView = viewBinding.ll
         contentView.apply {
@@ -159,6 +216,7 @@ class FooWindow(
     }
 
     private fun reset() {
+        mClockWise = null
         viewBinding.ll.apply {
 //            val h_ = width
 //            val w_ = height
