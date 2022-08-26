@@ -7,7 +7,7 @@ import com.example.widget.recycler.HolderBinding
 import com.example.widget.recycler.databinding.ItemPicBinding
 
 class DashboardAdapter(
-    private val data: List<String>
+    val data: MutableList<String>
 ): RecyclerView.Adapter<HolderBinding<ItemPicBinding>>() {
 
     override fun onCreateViewHolder(
@@ -27,7 +27,11 @@ class DashboardAdapter(
 
     override fun onBindViewHolder(holder: HolderBinding<ItemPicBinding>, position: Int) {
         with(holder.delegate) {
-            title.text = data[position]
+            if (position == 0) {
+                title.text = "new"
+            } else {
+                title.text = data[position]
+            }
         }
     }
 }

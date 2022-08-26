@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.widget.recycler.R
 import com.example.widget.recycler.databinding.FragmentHomeBinding
 import com.example.widget.recycler.ktx.autoUnbind
-import com.github.foodie_team.sugar.dp
+import com.github.foodiestudio.sugar.dp
 import java.util.*
 
 class HomeFragment : Fragment() {
