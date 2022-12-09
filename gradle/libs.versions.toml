@@ -1,0 +1,68 @@
+# application version catalog v0.1.0
+[versions]
+agp = "7.2.0"
+kotlin = { strictly = "1.7.0" }
+compose = "1.2.0"
+retrofit = "2.9.0"
+lintTool = "30.2.0"
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+sqldelight = { id = "com.squareup.sqldelight", version = "1.5.3" }
+ksp = { id = "com.google.devtools.ksp", version = "1.7.0-1.0.6" }
+
+[libraries]
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+retrofit-converter-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
+okhttp-logging = "com.squareup.okhttp3:logging-interceptor:4.10.0"
+
+androidx-ktx = "androidx.core:core-ktx:1.7.0"
+material = "com.google.android.material:material:1.4.0"
+lifecycle-ktx = "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0"
+datastore = "androidx.datastore:datastore:1.0.0"
+datastore-preferences = "androidx.datastore:datastore-preferences:1.0.0"
+
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+compose-material = { module = "androidx.compose.material:material", version.ref = "compose" }
+compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose" }
+compose-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "compose" }
+compose-material-icons = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose" }
+activity-compose = "androidx.activity:activity-compose:1.3.1"
+
+# compose destination
+compose-destinations-core = { module = "io.github.raamcosta.compose-destinations:animations-core", version = "1.6.15-beta" }
+compose-destinations-ksp = { module = "io.github.raamcosta.compose-destinations:ksp", version = "1.6.15-beta" }
+
+# common
+logcat = "com.squareup.logcat:logcat:0.1"
+coil = "io.coil-kt:coil-compose:1.4.0"
+koin = "io.insert-koin:koin-android:3.2.0"
+sql = "com.squareup.sqldelight:android-driver:1.5.3"
+
+ctc = "com.github.kkoshin:ctc:0.1.1"
+sugar = "com.github.foodiestudio:sugar:0.0.1-rc.8"
+dev-tools = "com.github.foodiestudio:dev-tools:0.0.1"
+theme = "com.github.foodiestudio:app-theme:0.1.3"
+
+# for lint (optional)
+lint-core = { module = "com.android.tools.lint:lint", version.ref = "lintTool" }
+lint-api = { module = "com.android.tools.lint:lint-api", version.ref = "lintTool" }
+lint-checks = { module = "com.android.tools.lint:lint-checks", version.ref = "lintTool" }
+lint-tests = { module = "com.android.tools.lint:lint-tests", version.ref = "lintTool" }
+
+# for test
+junit = "junit:junit:4.+"
+junit-android = "androidx.test.ext:junit:1.1.3"
+junit-compose = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "compose" }
+espresso = "androidx.test.espresso:espresso-core:3.4.0"
+
+[bundles]
+jetpack = ["androidx-ktx", "material", "lifecycle-ktx", "datastore", "datastore-preferences"]
+compose = ["compose-ui", "compose-material", "activity-compose", "compose-livedata", "compose-material-icons"]
+network = ["retrofit", "retrofit-converter-gson", "okhttp-logging"]
+debug = ["compose-ui-tooling", "dev-tools"]
+unit-tests = ["junit"]
+android-tests = ["junit-android", "junit-compose", "espresso"]
+lint = ["lint-core", "lint-api", "lint-checks", "lint-tests"]

@@ -1,0 +1,119 @@
+plugins {
+    alias libs.plugins.android.application
+    alias libs.plugins.kotlin.android
+    alias libs.plugins.sqldelight
+    alias libs.plugins.ksp
+    id 'maven-publish'
+}
+
+android {
+    compileSdk 32
+
+    defaultConfig {
+        applicationId "com.github.foodiestudio.application"
+        minSdk 21
+        targetSdk 32
+        versionCode 1
+        versionName "0.1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        vectorDrawables {
+            useSupportLibrary true
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+    buildFeatures {
+        compose true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion libs.versions.compose.get()
+    }
+    packagingOptions {
+        resources {
+            excludes += '/META-INF/{AL2.0,LGPL2.1}'
+        }
+    }
+
+    // compose-destinations
+    applicationVariants.all { variant ->
+        kotlin.sourceSets {
+            getByName(variant.name) {
+                kotlin.srcDir("build/generated/ksp/${variant.name}/kotlin")
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation libs.bundles.network
+    implementation libs.bundles.jetpack
+    implementation libs.bundles.compose
+    debugImplementation libs.bundles.debug
+//    debugImplementation libs.bundles.lint
+
+    testImplementation libs.bundles.unit.tests
+    androidTestImplementation libs.bundles.android.tests
+
+    implementation libs.logcat
+    implementation libs.coil
+    implementation libs.koin
+    implementation libs.sql
+    implementation libs.ctc
+    implementation libs.theme
+    implementation libs.compose.destinations.core
+    ksp libs.compose.destinations.ksp
+}
+
+afterEvaluate {
+    def versionNumber = android.defaultConfig.versionName
+    def group = android.defaultConfig.applicationId
+    def artifact = archivesBaseName.toLowerCase()
+    def GITHUB_USERID_REPOSITORY = "foodiestudio/application"
+    publishing {
+        publications {
+            // unsigned apk
+//            releaseApk(MavenPublication) {
+//                from components.release_apk
+//                groupId = group
+//                artifactId = artifact
+//                version = versionNumber
+//            }
+        }
+
+        repositories {
+//            maven {
+//                def releasesRepoUrl = "$buildDir/repos/releases"
+//
+//                name = "test"
+//                url = releasesRepoUrl
+//            }
+            maven {
+                def localProp = new Properties()
+                def localFile = rootProject.file("local.properties")
+                if (localFile != null && localFile.exists()) {
+                    localProp.load(new FileInputStream(localFile))
+                }
+
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/$GITHUB_USERID_REPOSITORY")
+                credentials {
+                    username = localProp['gpr.usr'] ?: System.getenv("USERNAME")
+                    password = localProp['gpr.key'] ?: System.getenv("TOKEN")
+                }
+            }
+        }
+    }
+}
