@@ -7,12 +7,13 @@ plugins {
 }
 
 android {
-    compileSdk 32
+    namespace = "com.github.foodiestudio.application"
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.github.foodiestudio.application"
-        minSdk 21
-        targetSdk 32
+        minSdk 26
+        targetSdk 33
         versionCode 1
         versionName "0.1.0"
 
@@ -39,7 +40,7 @@ android {
         compose true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion libs.versions.compose.get()
+        kotlinCompilerExtensionVersion libs.versions.composeCompiler.get()
     }
     packagingOptions {
         resources {
@@ -58,6 +59,11 @@ android {
 }
 
 dependencies {
+    implementation platform(libs.compose.bom)
+    implementation platform(libs.okhttp.bom)
+    testImplementation platform(libs.compose.bom)
+    androidTestImplementation platform(libs.compose.bom)
+
     implementation libs.bundles.network
     implementation libs.bundles.jetpack
     implementation libs.bundles.compose
@@ -75,6 +81,9 @@ dependencies {
     implementation libs.theme
     implementation libs.compose.destinations.core
     ksp libs.compose.destinations.ksp
+
+    implementation "com.airbnb.android:showkase:1.0.0-beta18"
+    ksp "com.airbnb.android:showkase-processor:1.0.0-beta18"
 }
 
 afterEvaluate {
