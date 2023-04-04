@@ -9,7 +9,7 @@ composeCompiler = "1.4.4"
 
 # langauge and platform
 kotlin = "1.8.10"
-composeBom = "2023.01.00" # kotlin 1.8.0
+composeBom = "2023.03.00" # kotlin 1.8.0
 activityCompose = "1.5.1"
 lifecycle = "2.5.1"
 datastore = "1.0.0"
