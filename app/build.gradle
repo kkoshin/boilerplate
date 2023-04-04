@@ -7,6 +7,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        debug {
+            storeFile rootProject.file('debug.keystore')
+            storePassword 'debug0'
+            keyAlias 'debug0'
+            keyPassword 'debug0'
+        }
+    }
     namespace = "com.github.foodiestudio.application"
     compileSdk 33
 
@@ -21,6 +29,7 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+        signingConfig signingConfigs.debug
     }
 
     buildTypes {
