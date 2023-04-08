@@ -28,6 +28,7 @@ composeDestinations = "1.7.32-beta" # require compose 1.3.x
 coilCompose = "2.2.2"
 koinAndroid = "3.3.3"
 mmkv = "1.2.15"
+showkase = "1.0.0-beta18"
 
 [plugins]
 sqldelight = { id = "com.squareup.sqldelight", version.ref = "sqldelight" }
@@ -45,6 +46,9 @@ datastore = { module = "androidx.datastore:datastore", version.ref = "datastore"
 datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity-compose" }
 material = { module = "com.google.android.material:material", version.ref = "material" }
+
+showkase = { module = "com.airbnb.android:showkase", version.ref = "showkase" }
+showkase-processor = { module = "com.airbnb.android:showkase-processor", version.ref = "showkase" }
 
 # compose destination
 compose-destinations-core = { module = "io.github.raamcosta.compose-destinations:animations-core", version.ref = "composeDestinations" }

@@ -18,6 +18,7 @@ kotlin {
                 api(compose.runtime)
                 api(compose.foundation)
                 api(compose.material)
+                api(compose.preview)
             }
         }
         val commonTest by getting {
@@ -35,11 +36,7 @@ kotlin {
                 implementation(libs.bundles.unit.tests)
             }
         }
-        val desktopMain by getting {
-            dependencies {
-                api(compose.preview)
-            }
-        }
+        val desktopMain by getting
         val desktopTest by getting
     }
 }

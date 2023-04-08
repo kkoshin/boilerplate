@@ -12,12 +12,16 @@ dependencies {
     implementation(androidLibs.activity.compose)
     implementation(androidLibs.bundles.jetpack)
     debugImplementation(androidLibs.bundles.debug)
+    implementation(androidLibs.coil)
+    implementation(androidLibs.koin)
+    implementation(androidLibs.sql)
+    implementation(androidLibs.ctc)
+    implementation(androidLibs.theme)
+    implementation(androidLibs.showkase)
+    ksp(androidLibs.showkase.processor)
 
 //    implementation(androidLibs.compose.destinations.core)
 //    ksp(androidLibs.compose.destinations.ksp)
-
-    implementation("com.airbnb.android:showkase:1.0.0-beta18")
-    ksp("com.airbnb.android:showkase-processor:1.0.0-beta18")
 }
 
 android {
@@ -51,4 +55,8 @@ android {
 //            }
 //        }
 //    }
+}
+
+ksp {
+    arg("skipPrivatePreviews", "true")
 }
