@@ -34,13 +34,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import com.github.foodiestudio.application.data.FakeData
 import com.github.foodiestudio.application.data.TrackData
 
-@Preview(name = "VideoEditor", group = "Media components")
 @Composable
 fun VideoEditor() {
     val density = LocalDensity.current
