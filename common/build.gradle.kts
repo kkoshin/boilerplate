@@ -19,6 +19,7 @@ kotlin {
                 api(compose.foundation)
                 api(compose.material)
                 api(compose.preview)
+                api(compose.materialIconsExtended)
             }
         }
         val commonTest by getting {
