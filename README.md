@@ -9,3 +9,6 @@
 - libs.version.toml: common dependencies
 - android.versions.toml: android dependencies
 - desktop.versions.toml: desktop dependencies
+
+### known issue
+`@Preview` can't be used in the commonMain module 
