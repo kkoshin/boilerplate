@@ -1,6 +1,10 @@
 package com.github.foodiestudio.application.media
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollBy
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,6 +28,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Circle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -31,6 +36,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -39,6 +45,10 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.github.foodiestudio.application.data.FakeData
 import com.github.foodiestudio.application.data.calculatePts
+import com.github.foodiestudio.application.logcat
+import kotlinx.coroutines.launch
+import kotlin.system.measureNanoTime
+import kotlin.system.measureTimeMillis
 
 @Composable
 fun EditorScreen() {
@@ -49,7 +59,7 @@ fun EditorScreen() {
         PlaybackBar(ptsMills.toFloat(), onValueChange = {
             ptsMills = it.toInt()
         })
-        VideoEditor(ptsMills, onSeekRequest = {
+        VideoEditor(Modifier, ptsMills, onSeekRequest = {
             ptsMills = it
         })
         MenuBar()
@@ -58,7 +68,7 @@ fun EditorScreen() {
 
 // 可能有点违背单一数据原则（ptsMills）触发页面滚动，用户自身也能手动触发滚动，为了让滚动更流畅，会内部先响应滚动，然后再同步给外面的播放器
 @Composable
-fun VideoEditor(ptsMills: Int, onSeekRequest: (Int) -> Unit) {
+fun VideoEditor(modifier: Modifier, ptsMills: Int, onSeekRequest: (Int) -> Unit) {
     val density = LocalDensity.current
     val captions = FakeData.captions
 
@@ -72,7 +82,7 @@ fun VideoEditor(ptsMills: Int, onSeekRequest: (Int) -> Unit) {
     // 这种方式的改动是直接修改，是无法观测到滚动过程中的 index/offset 的值的变化，最终在滚动完成后，可以查询到 firstVisibleItemIndex 的变化
     LaunchedEffect(lazyScrollState, ptsMills) {
         if (ptsMills == timelinePts) {
-            println("ignore ptsMills changed")
+            // ignore ptsMills changed
             return@LaunchedEffect
         }
         // FIXME captions 是排序过的，这里可以用二分查找的方式查询提高效率
@@ -115,10 +125,20 @@ fun VideoEditor(ptsMills: Int, onSeekRequest: (Int) -> Unit) {
         onSeekRequest(pts)
     }
 
+    val scope = rememberCoroutineScope()
+
     MaterialTheme {
         BoxWithConstraints(
-            Modifier
+            modifier = modifier
                 .fillMaxWidth()
+                .scrollable(rememberScrollableState {
+                    // View component deltas should be reflected in Compose
+                    // components that participate in nested scrolling
+                    scope.launch {
+                        lazyScrollState.scrollBy(-it)
+                    }
+                    it
+                }, Orientation.Horizontal)
                 .background(Color.Black),
         ) {
             val constraints = constraints
@@ -126,17 +146,17 @@ fun VideoEditor(ptsMills: Int, onSeekRequest: (Int) -> Unit) {
                 BRollGroup(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(max = 120.dp)
+                        .heightIn(min = 36.dp * FakeData.trackGroupData.trackData.size.coerceAtMost(3), max = 120.dp)
                         .padding(vertical = 0.dp),
                     rolls = FakeData.trackGroupData,
                     getVisibleTimeLineRange = {
-                        // TODO(Jiangc):  
+                        // TODO(Jiangc): 返回可见的区间
                         0..1
                     },
                     timelineMeasure = {
                         TimelineHelper.measure(
                             captions,
-                            lazyScrollState.firstVisibleItemIndex,
+                            lazyScrollState.firstVisibleItemIndex - lazyScrollState.layoutIndexOfFirstVisibleItem(),
                             lazyScrollState.layoutInfo,
                             it
                         )
@@ -211,8 +231,8 @@ fun MenuBar() {
         repeat(5) {
             Button(onClick = {}) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(Icons.Default.Circle, null, tint = Color.LightGray)
-                    Text("Debug")
+                    Icon(Icons.Default.Add, null, tint = Color.LightGray)
+                    Text("Add")
                 }
             }
         }
