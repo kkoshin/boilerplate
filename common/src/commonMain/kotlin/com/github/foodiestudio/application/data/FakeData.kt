@@ -13,11 +13,16 @@ object FakeData {
     }
 
     // milliseconds
-    val bRollData: List<EffectData> = listOf(
-        EffectData(10..20), EffectData(30..50)
+    private val bRollData1: List<EffectData> = listOf(
+        EffectData(30..80),
+        EffectData(190..320),
+    )
+    private val bRollData2: List<EffectData> = listOf(
+        EffectData(0..40),
+        EffectData(70..120),
     )
 
-    val trackGroupData = TrackData(trackData = listOf(bRollData, bRollData, bRollData, bRollData))
+    val trackGroupData = TrackData(trackData = listOf(bRollData1, bRollData2))
 }
 
 data class EffectData(
