@@ -48,7 +48,7 @@ fun BRollGroup(
     modifier: Modifier,
     rolls: TrackData,
     getVisibleTimeLineRange: () -> IntRange,
-    timelineMeasure: (IntRange) -> BRollItemPosition
+    timelineMeasure: (LongRange) -> BRollItemPosition
 ) {
     val density = LocalDensity.current
     val visibleTimeLineRange: IntRange by remember(rolls) {

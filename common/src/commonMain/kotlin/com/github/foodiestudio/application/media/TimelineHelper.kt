@@ -1,5 +1,6 @@
 package com.github.foodiestudio.application.media
 
+import androidx.compose.foundation.lazy.LazyListItemInfo
 import androidx.compose.foundation.lazy.LazyListLayoutInfo
 import androidx.compose.foundation.lazy.LazyListState
 import com.github.foodiestudio.application.data.CaptionBlock
@@ -21,7 +22,7 @@ object TimelineHelper {
         captions: List<CaptionBlock>,
         dataIndexForFirstLayoutVisibleItem: Int,
         layoutInfo: LazyListLayoutInfo,
-        duration: IntRange
+        duration: LongRange
     ): BRollItemPosition {
         if (layoutInfo.visibleItemsInfo.isEmpty()) {
             return BRollItemPosition.Unspecific
@@ -46,15 +47,6 @@ object TimelineHelper {
         val startVisibleItem =
             layoutInfo.visibleItemsInfo[firstVisibleCaptionIndex - dataIndexForFirstLayoutVisibleItem]
         val endVisibleItem = layoutInfo.visibleItemsInfo[lastVisibleCaptionIndex - dataIndexForFirstLayoutVisibleItem]
-
-        // 绘制的情况总共有这几种
-        // 1. duration's first edge is offset screen, when clicked, should not see first indicator, so need return at least [indicator width]
-        //   1.0 duration's last edge is left offset screen, It's totally invisible, so just return (0 to Size.Unspecified)
-        //   1.1 duration's last edge is small: It's just fine to return (offset, size)
-        //   1.2 .1 duration length is too long, it's end edge is offset from screen. when it clicked, should not see last indicator, so ensure (offset + width) >= viewport size + indicator width
-        // 2. duration's first edge is in screen
-        //   2.0 duration length is small: It's just fine to return (offset, size)
-        //   2.1 duration length is too long, it's end edge is offset from screen. when it clicked, should not see last indicator, so ensure (offset + width) >= viewport size + indicator width
 
         // TODO 已知问题，在头部边界的时候，因为丢失了前面一些视图的长度信息，无法正确的估计出 B Roll 的长度，所以这里的长度会按大概的方式预估下
         val extraStartOffset = if (startCaptionIndex < dataIndexForFirstLayoutVisibleItem) {
@@ -86,7 +78,38 @@ object TimelineHelper {
         )
     }
 
-    private fun getItemFraction(pts: Int, block: CaptionBlock): Float {
+    /**
+     * 查询某个点对应的时间戳
+     * 如果这个点不在可见的时间轴上的话，返回 -1
+     */
+    fun queryPts(
+        captions: List<CaptionBlock>,
+        dataIndexForFirstLayoutVisibleItem: Int,
+        layoutInfo: LazyListLayoutInfo,
+        position: Int
+    ): Long {
+        // 边界判断
+        val relativeOffset = position + layoutInfo.viewportStartOffset
+        if (relativeOffset < layoutInfo.visibleItemsInfo.first().offset || relativeOffset > layoutInfo.visibleItemsInfo.last()
+                .let { it.offset + it.size }
+        ) {
+            return -1
+        }
+        val visibleIndex = layoutInfo.visibleItemsInfo.indexOfFirst { relativeOffset in it.offset..it.offset + it.size }
+        val dataIndex = visibleIndex + dataIndexForFirstLayoutVisibleItem
+        val fraction = getItemFraction(
+            relativeOffset,
+            layoutInfo.visibleItemsInfo[visibleIndex]
+        )
+        return (captions[dataIndex].duration * fraction).toLong() + captions[dataIndex].pts
+    }
+
+    private fun getItemFraction(offset: Int, item: LazyListItemInfo): Float {
+        assert(offset in item.offset..item.offset + item.size)
+        return (offset - item.offset).toFloat() / item.size
+    }
+
+    private fun getItemFraction(pts: Long, block: CaptionBlock): Float {
         assert(pts in block.pts until block.pts + block.duration)
         return (pts - block.pts).toFloat() / block.duration
     }
