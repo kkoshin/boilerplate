@@ -14,19 +14,19 @@ object FakeData {
 
     // milliseconds
     private val bRollData1: List<EffectData> = listOf(
-        EffectData(30..80),
-        EffectData(190..320),
+        EffectData(30L..80L),
+        EffectData(190L..320L),
     )
     private val bRollData2: List<EffectData> = listOf(
-        EffectData(0..40),
-        EffectData(70..120),
+        EffectData(0L..40L),
+        EffectData(70L..120L),
     )
 
     val trackGroupData = TrackData(trackData = listOf(bRollData1, bRollData2))
 }
 
 data class EffectData(
-    val duration: IntRange,
+    val duration: LongRange,
     val type: String = "gif"
 )
 

@@ -11,7 +11,7 @@ import org.junit.Assert.*
 
 class TimelineHelperTest {
 
-    private val bRollDuration = IntRange(20, 120)
+    private val bRollDuration = LongRange(20, 120)
 
     private val mockCaptions = listOf(
         CaptionBlock("0/in", 0, 20),
@@ -52,6 +52,27 @@ class TimelineHelperTest {
     @Test
     fun `scroll to second item with 10 offset`() {
 
+    }
+
+    @Test
+    fun `query pts`() {
+        var offset = 0
+        val visibleItems = mockCaptions.take(4).mapIndexed { index, caption ->
+            object : LazyListItemInfo {
+                override val index: Int = index
+                override val key: Any = Any()
+                override val offset: Int = offset
+                override val size: Int = 100 // hardcode
+                //                override val size: Int = caption.text.length * 10 + 32
+            }.also {
+                offset += it.size
+            }
+        }
+        assertEquals(true, visibleItems[2].offset > 0)
+        val layoutInfo = createLayoutInfo(visibleItems)
+        TimelineHelper.queryPts(mockCaptions, 0, layoutInfo, 100 - (-600) + 150).let {
+            assertEquals(bRollDuration.last, it)
+        }
     }
 
     private fun createLayoutInfo(visibleItems: List<LazyListItemInfo>): LazyListLayoutInfo {
