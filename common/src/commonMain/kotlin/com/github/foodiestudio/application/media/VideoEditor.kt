@@ -43,7 +43,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
+import com.github.foodiestudio.application.data.EffectData
 import com.github.foodiestudio.application.data.FakeData
+import com.github.foodiestudio.application.data.Track
+import com.github.foodiestudio.application.data.TrackData
+import com.github.foodiestudio.application.data.TrackType
 import com.github.foodiestudio.application.data.calculatePts
 import com.github.foodiestudio.application.logcat
 import kotlinx.coroutines.launch
@@ -55,20 +59,38 @@ fun EditorScreen() {
     var ptsMills by remember {
         mutableStateOf(0)
     }
+    var rolls by remember {
+        mutableStateOf(FakeData.trackGroupData)
+    }
     Column {
         PlaybackBar(ptsMills.toFloat(), onValueChange = {
             ptsMills = it.toInt()
         })
-        VideoEditor(Modifier, ptsMills, onSeekRequest = {
+        VideoEditor(ptsMills, rolls, onSeekRequest = {
             ptsMills = it
         })
-        MenuBar()
+        MenuBar {
+            if (it == Menu.StyledText) {
+                rolls = rolls.toMutableList().apply {
+                    add(
+                        Track(
+                            track = listOf(EffectData.StyledText(ptsMills..(ptsMills + 1000L))),
+                            trackType = TrackType.StyledText
+                        )
+                    )
+                }
+            }
+        }
     }
 }
 
 // 可能有点违背单一数据原则（ptsMills）触发页面滚动，用户自身也能手动触发滚动，为了让滚动更流畅，会内部先响应滚动，然后再同步给外面的播放器
 @Composable
-fun VideoEditor(modifier: Modifier, ptsMills: Int, onSeekRequest: (Int) -> Unit) {
+fun VideoEditor(
+    ptsMills: Int,
+    bRolls: TrackData,
+    onSeekRequest: (Int) -> Unit
+) {
     val density = LocalDensity.current
     val captions = FakeData.captions
 
@@ -145,7 +167,7 @@ fun VideoEditor(modifier: Modifier, ptsMills: Int, onSeekRequest: (Int) -> Unit)
 
     MaterialTheme {
         BoxWithConstraints(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .scrollable(rememberScrollableState {
                     // View component deltas should be reflected in Compose
@@ -162,9 +184,9 @@ fun VideoEditor(modifier: Modifier, ptsMills: Int, onSeekRequest: (Int) -> Unit)
                 BRollGroup(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .heightIn(min = 36.dp * FakeData.trackGroupData.trackData.size.coerceAtMost(3), max = 120.dp)
+                        .heightIn(min = 36.dp * bRolls.size.coerceAtMost(3), max = 120.dp)
                         .padding(vertical = 0.dp),
-                    rolls = FakeData.trackGroupData,
+                    rolls = bRolls,
                     getVisibleTimeLineRange = {
                         // TODO(Jiangc): 返回可见的区间
                         0..1
@@ -234,8 +256,12 @@ fun PlaybackBar(value: Float, onValueChange: (Float) -> Unit) {
     }
 }
 
+enum class Menu {
+    StyledText, Sticker, Media, Gif
+}
+
 @Composable
-fun MenuBar() {
+fun MenuBar(onMenuClick: (Menu) -> Unit) {
     val scrollState = rememberScrollState()
     Row(
         Modifier.fillMaxWidth().horizontalScroll(scrollState)
@@ -244,11 +270,11 @@ fun MenuBar() {
             .padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceAround
     ) {
-        repeat(5) {
-            Button(onClick = {}) {
+        Menu.values().forEach {
+            Button(onClick = { onMenuClick(it) }) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Icon(Icons.Default.Add, null, tint = Color.LightGray)
-                    Text("Add")
+                    Text(it.name)
                 }
             }
         }

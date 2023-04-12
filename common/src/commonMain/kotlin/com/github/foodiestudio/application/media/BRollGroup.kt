@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import com.github.foodiestudio.application.data.TrackData
+import com.github.foodiestudio.application.data.TrackType
 import kotlin.math.roundToInt
 
 // 当文字一定的情况下，这些 B-Roll 一旦计算过，这个映射关系可以缓存下来，下次直接复用
@@ -63,10 +64,10 @@ fun BRollGroup(
 //        rolls.trackData.filter { roll ->
 //            roll.any { it.duration - visibleTimeLineRange}
 //        }
-        items(rolls.trackData) {
+        items(rolls) {
             // 查询每个 roll 里的元素位置信息
             Box(Modifier.fillMaxWidth()) {
-                it.map {
+                it.track.map {
                     timelineMeasure(it.duration)
                 }.forEach { (offset, width) ->
                     if (width <= 0) {
@@ -78,6 +79,7 @@ fun BRollGroup(
                                 DpSize(width = width.toDp(), 32.dp)
                             ) {
                             }
+
                         }
                     }
                 }
@@ -122,12 +124,14 @@ fun EffectItem(
                 .width(selectedItemWidth)
                 .height(IntrinsicSize.Min)
         ) {
-            Indicator(modifier = Modifier.fillMaxHeight().draggable(
-                orientation = Orientation.Horizontal,
-                state = rememberDraggableState { delta ->
-                    offsetX += delta
-                }
-            ))
+            Indicator(modifier = Modifier
+                .fillMaxHeight()
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    state = rememberDraggableState { delta ->
+                        offsetX += delta
+                    }
+                ))
             Text(
                 "XXXX",
                 Modifier
@@ -135,12 +139,14 @@ fun EffectItem(
                     .weight(1f),
                 maxLines = 1,
             )
-            Indicator(modifier = Modifier.fillMaxHeight().draggable(
-                orientation = Orientation.Horizontal,
-                state = rememberDraggableState { delta ->
-                    widthOffset = (widthOffset + delta).coerceAtLeast(-minWidthOffset)
-                }
-            ))
+            Indicator(modifier = Modifier
+                .fillMaxHeight()
+                .draggable(
+                    orientation = Orientation.Horizontal,
+                    state = rememberDraggableState { delta ->
+                        widthOffset = (widthOffset + delta).coerceAtLeast(-minWidthOffset)
+                    }
+                ))
         }
     } else {
         Box(
@@ -149,7 +155,7 @@ fun EffectItem(
                 .size(contentSize)
                 .clickable { selected = !selected }
         ) {
-            Text("Sample")
+            Text("Sample", maxLines = 1)
         }
     }
 }

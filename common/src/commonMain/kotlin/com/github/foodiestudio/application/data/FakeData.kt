@@ -1,5 +1,7 @@
 package com.github.foodiestudio.application.data
 
+import androidx.compose.ui.graphics.painter.Painter
+
 object FakeData {
 
     private val testData =
@@ -14,25 +16,40 @@ object FakeData {
 
     // milliseconds
     private val bRollData1: List<EffectData> = listOf(
-        EffectData(30L..80L),
-        EffectData(190L..320L),
+        EffectData.StyledText(30L..80L),
+        EffectData.StyledText(190L..320L),
     )
     private val bRollData2: List<EffectData> = listOf(
-        EffectData(0L..40L),
-        EffectData(70L..120L),
+        EffectData.StyledText(0L..40L),
+        EffectData.StyledText(70L..120L),
     )
 
-    val trackGroupData = TrackData(trackData = listOf(bRollData1, bRollData2))
+    val trackGroupData = listOf(
+        Track(bRollData1, TrackType.StyledText),
+        Track(bRollData2, TrackType.StyledText),
+    )
 }
 
-data class EffectData(
-    val duration: LongRange,
-    val type: String = "gif"
+sealed class EffectData(
+    val duration: LongRange
+) {
+    class StyledText(duration: LongRange, val text: String = "Sample") : EffectData(duration)
+    class Gif(val img: Painter, duration: LongRange) : EffectData(duration)
+    class Sticker(val img: Painter, duration: LongRange) : EffectData(duration)
+    class Picture(val img: Painter, duration: LongRange) : EffectData(duration)
+    class Audio(val text: String, duration: LongRange) : EffectData(duration)
+}
+
+enum class TrackType {
+    StyledText, Gif, Sticker, Picture, Audio
+}
+
+data class Track(
+    val track: List<EffectData>,
+    val trackType: TrackType,
 )
 
-data class TrackData(
-    val trackData: List<List<EffectData>>
-)
+typealias TrackData = List<Track>
 
 data class CaptionBlock(
     val text: String,
