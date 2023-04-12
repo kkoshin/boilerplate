@@ -72,12 +72,16 @@ fun VideoEditor(modifier: Modifier, ptsMills: Int, onSeekRequest: (Int) -> Unit)
     val density = LocalDensity.current
     val captions = FakeData.captions
 
-    // 主要是为了区分内部触发
     var timelinePts by remember {
         mutableStateOf(ptsMills)
     }
 
     val lazyScrollState = rememberLazyListState(0, 0)
+
+    // 主要是为了区分内部触发
+    var targetItemAndOffset by remember {
+        mutableStateOf((0 to 0))
+    }
 
     // 这种方式的改动是直接修改，是无法观测到滚动过程中的 index/offset 的值的变化，最终在滚动完成后，可以查询到 firstVisibleItemIndex 的变化
     LaunchedEffect(lazyScrollState, ptsMills) {
@@ -89,6 +93,7 @@ fun VideoEditor(modifier: Modifier, ptsMills: Int, onSeekRequest: (Int) -> Unit)
         captions.indexOfLast {
             it.pts <= ptsMills
         }.let {
+            timelinePts = ptsMills
             // 第一次滚动的时候，无法查询对应的元素的宽度，只能让他变为可见
             lazyScrollState.scrollToItem(it)
             // 第一次滚动完成后，因为可见，所以可以查询到对应的元素的宽度
@@ -97,8 +102,8 @@ fun VideoEditor(modifier: Modifier, ptsMills: Int, onSeekRequest: (Int) -> Unit)
             // FIXME 通过 key 来查找 item
             val item = lazyScrollState.layoutInfo.visibleItemsInfo.first { it.offset == 0 }
             val offset = item.size * (fraction)
+            targetItemAndOffset = it to offset.toInt()
             lazyScrollState.scrollToItem(it, offset.toInt())
-            timelinePts = ptsMills
         }
     }
 
@@ -116,13 +121,24 @@ fun VideoEditor(modifier: Modifier, ptsMills: Int, onSeekRequest: (Int) -> Unit)
         }
     }
     LaunchedEffect(firstVisibleItemIndex, firstVisibleItemScrollOffset) {
+        if (firstVisibleItemIndex == targetItemAndOffset.first && firstVisibleItemScrollOffset == targetItemAndOffset.second) {
+            return@LaunchedEffect
+        }
         // FIXME 用 key 的方式查找 item 看上去可能更直接
         val itemIndex = lazyScrollState.layoutIndexOfFirstVisibleItem()
         val item = lazyScrollState.layoutInfo.visibleItemsInfo[itemIndex]
         val pts = captions[firstVisibleItemIndex].calculatePts(firstVisibleItemScrollOffset.toFloat() / item.size)
         // 这里的滚动是内部触发的，内部自己刷新了 pts，onSeekRequest 会将这个 pts 变更同步到上层
-        timelinePts = pts
-        onSeekRequest(pts)
+        if (timelinePts != pts) {
+            logcat {
+                """
+                    timelinePts: $timelinePts
+                    pts: $pts
+                """.trimIndent()
+            }
+            timelinePts = pts
+            onSeekRequest(pts)
+        }
     }
 
     val scope = rememberCoroutineScope()
