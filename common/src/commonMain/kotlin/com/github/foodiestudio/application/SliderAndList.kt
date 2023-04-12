@@ -55,6 +55,7 @@ fun SliderAndList() {
             logcat {
                 "seekRequest"
             }
+            innerProgress = firstVisibleItemIndex.toProgress()
             progress = innerProgress
         }
     }
