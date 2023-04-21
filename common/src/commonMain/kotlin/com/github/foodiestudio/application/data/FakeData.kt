@@ -7,7 +7,7 @@ object FakeData {
     private val testData =
         "In video production, A-roll is the primary footage of a project’s main subject, while B-roll shots are supplemental footage. B-roll provides filmmakers with flexibility in the editing process and is often spliced together with A-roll footage to bolster the story, create dramatic tension, or further illustrate a point. Stories that rely entirely on A-roll footage might feel off-balance; this is why shooting B-roll is important."
 
-    private var pts = 0
+    private var pts = 0L
     val captions: List<CaptionBlock> = testData.split(" ", "\n").map {
         CaptionBlock(it, pts, it.length * 10).also { p ->
             pts += p.duration
@@ -53,9 +53,9 @@ typealias TrackData = List<Track>
 
 data class CaptionBlock(
     val text: String,
-    val pts: Int,
+    val pts: Long,
     val duration: Int,
     val isSilence: Boolean = false
 )
 
-fun CaptionBlock.calculatePts(fraction: Float): Int = pts + (duration * fraction).toInt()
+fun CaptionBlock.calculatePts(fraction: Float): Long = pts + (duration * fraction).toLong()

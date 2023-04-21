@@ -16,7 +16,7 @@ fun ARoll(
     state: LazyListState,
     captions: List<CaptionBlock>,
     contentPaddingValues: PaddingValues,
-    onClick: (Int) -> Unit
+    onClick: (Long) -> Unit
 ) {
     LazyRow(
         state = state,
