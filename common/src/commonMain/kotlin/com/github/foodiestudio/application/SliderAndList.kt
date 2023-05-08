@@ -14,7 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.github.foodiestudio.application.logcat
+import com.github.foodiestudio.application.common.logcat
 
 /**
  * 验证 LazyList 的联动，Slider 的进度和 下面的 List 包括同步

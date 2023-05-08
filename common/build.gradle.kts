@@ -30,6 +30,7 @@ kotlin {
         val androidMain by getting {
             dependencies {
                 api(androidLibs.logcat)
+                implementation(androidLibs.coil)
             }
         }
         val androidInstrumentedTest by getting {
@@ -37,7 +38,11 @@ kotlin {
                 implementation(libs.bundles.unit.tests)
             }
         }
-        val desktopMain by getting
+        val desktopMain by getting {
+            dependencies {
+                implementation(desktopLibs.image.loader)
+            }
+        }
         val desktopTest by getting
     }
 }

@@ -1,0 +1,12 @@
+# desktop
+[versions]
+# other third-party
+image-loader = "1.4.0"
+
+[plugins]
+
+[libraries]
+image-loader = { module = "io.github.qdsfdhvh:image-loader", version.ref = "image-loader" }
+
+[bundles]
+

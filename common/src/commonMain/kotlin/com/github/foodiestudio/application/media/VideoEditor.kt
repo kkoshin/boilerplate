@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import com.github.foodiestudio.application.data.FakeData
 import com.github.foodiestudio.application.data.TrackData
 import com.github.foodiestudio.application.data.calculatePts
-import com.github.foodiestudio.application.logcat
+import com.github.foodiestudio.application.common.logcat
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
