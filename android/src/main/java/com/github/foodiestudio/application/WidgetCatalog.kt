@@ -7,6 +7,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.foodiestudio.application.media.EditorScreen
 import com.github.foodiestudio.application.media.VideoPlayer
+import com.github.foodiestudio.application.FlipCard
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
@@ -22,6 +23,10 @@ fun VideoEditorPrev() = EditorScreen()
 @Preview(name = "VideoPlayer", group = "Media components")
 @Composable
 fun VideoPlayerPrev() = VideoPlayer()
+
+@Preview(name = "FlipCard", group = "Playground")
+@Composable
+fun FlipCardPrev() = FlipCard()
 
 @OptIn(FlowPreview::class)
 @Preview(name = "FlowTextButton", group = "Playground")
