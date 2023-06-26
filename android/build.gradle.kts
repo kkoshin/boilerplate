@@ -18,6 +18,7 @@ dependencies {
     implementation(androidLibs.ctc)
     implementation(androidLibs.theme)
     implementation(androidLibs.showkase)
+    implementation(androidLibs.material)
     ksp(androidLibs.showkase.processor)
 
 //    implementation(androidLibs.compose.destinations.core)

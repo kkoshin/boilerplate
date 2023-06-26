@@ -1,21 +1,14 @@
 # common
 [versions]
 # plugin
-ksp = "1.8.0-1.0.9"
-sqldelight = "1.5.5"
 
 # common
-junit = "4.13.2"
 
 # other third-party
 
 [plugins]
-sqldelight = { id = "com.squareup.sqldelight", version.ref = "sqldelight" }
-ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 
 [libraries]
-junit = { module = "junit:junit", version.ref = "junit" }
 
 [bundles]
-unit-tests = ["junit"]
 

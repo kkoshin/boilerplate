@@ -35,7 +35,7 @@ kotlin {
         }
         val androidInstrumentedTest by getting {
             dependencies {
-                implementation(libs.bundles.unit.tests)
+                implementation(androidLibs.junit)
             }
         }
         val desktopMain by getting {
