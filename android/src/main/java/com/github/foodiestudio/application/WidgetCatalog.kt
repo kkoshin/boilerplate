@@ -1,9 +1,12 @@
 package com.github.foodiestudio.application
 
+import android.view.HapticFeedbackConstants
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.foodiestudio.application.media.EditorScreen
 import com.github.foodiestudio.application.media.VideoPlayer
@@ -33,6 +36,7 @@ fun FlipCardPrev() = FlipCard()
 @Composable
 fun ClickFlow() {
     val buttonState = rememberFlowButtonState("Haha")
+    val haptic = LocalHapticFeedback.current
 
     val context = LocalContext.current
 
@@ -40,6 +44,7 @@ fun ClickFlow() {
         buttonState.clicks
             .debounce(200.milliseconds)
             .onEach {
+                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 Toast.makeText(context, "clicked!", Toast.LENGTH_SHORT).show()
             }
             .collect()
