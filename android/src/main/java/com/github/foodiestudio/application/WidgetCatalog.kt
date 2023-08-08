@@ -1,16 +1,18 @@
 package com.github.foodiestudio.application
 
-import android.view.HapticFeedbackConstants
 import android.widget.Toast
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.github.foodiestudio.application.list.PhotoGrid
 import com.github.foodiestudio.application.media.EditorScreen
 import com.github.foodiestudio.application.media.VideoPlayer
-import com.github.foodiestudio.application.FlipCard
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.debounce
@@ -30,6 +32,10 @@ fun VideoPlayerPrev() = VideoPlayer()
 @Preview(name = "FlipCard", group = "Playground")
 @Composable
 fun FlipCardPrev() = FlipCard()
+
+@Preview(name = "PhotoGrid", group = "Playground")
+@Composable
+fun PhotoGridPrev() = PhotoGrid(Modifier.height(360.dp))
 
 @OptIn(FlowPreview::class)
 @Preview(name = "FlowTextButton", group = "Playground")
