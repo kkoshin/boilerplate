@@ -31,6 +31,7 @@ kotlin {
             dependencies {
                 api(androidLibs.logcat)
                 implementation(androidLibs.coil)
+                implementation(androidLibs.pag)
             }
         }
         val androidInstrumentedTest by getting {

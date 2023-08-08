@@ -29,6 +29,7 @@ dependencyResolutionManagement {
             library("showkase", "com.airbnb.android:showkase:1.0.0-beta18")
             library("showkase-processor", "com.airbnb.android:showkase-processor:1.0.0-beta18")
             library("material", "com.google.android.material:material:1.7.0")
+            library("pag", "com.tencent.tav:libpag:4.2.41")
         }
         create("desktopLibs") {
             from(files("./gradle/desktop.versions.toml"))
@@ -39,3 +40,9 @@ dependencyResolutionManagement {
 rootProject.name = "application"
 
 include(":android", ":desktop", ":common")
+
+//includeBuild("/Users/ray/open-source/foodiestudio/dev-tools") {
+//    dependencySubstitution {
+//        substitute(module("com.github.foodiestudio:dev-tools"))
+//    }
+//}
