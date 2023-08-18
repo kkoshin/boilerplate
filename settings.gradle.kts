@@ -36,6 +36,4 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "application"
-
 include(":android", ":desktop", ":common")
