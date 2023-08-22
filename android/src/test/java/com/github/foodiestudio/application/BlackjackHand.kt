@@ -9,6 +9,7 @@ class BlackjackHand(
 
 @JsonClass(generateAdapter = true)
 class Card(
+    val rank: String,
     val suit: Suit
 )
 
