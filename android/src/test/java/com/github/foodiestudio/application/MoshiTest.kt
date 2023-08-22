@@ -5,6 +5,7 @@ import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
 import com.squareup.moshi.adapter
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
@@ -32,7 +33,10 @@ class MoshiTest {
            }
        """.trimIndent()
 
-        val moshi = Moshi.Builder().build()
+        val moshi = Moshi.Builder()
+            // 支持动态反射的方式，不加这个的话，则需要 ksp + @JsonClass 才能正确解析
+            .addLast(KotlinJsonAdapterFactory())
+            .build()
         val jsonAdapter = moshi.adapter<BlackjackHand>()
 
         val blackjackHand = jsonAdapter.fromJson(json)
@@ -50,7 +54,11 @@ class MoshiTest {
               ]
             }
         """.trimIndent()
-        val adapter = Moshi.Builder().add(CardAdapter()).build().adapter(BlackjackHand::class.java)
+        val adapter = Moshi.Builder()
+            .add(CardAdapter())
+            .addLast(KotlinJsonAdapterFactory())
+            .build()
+            .adapter(BlackjackHand::class.java)
         val data = adapter.fromJson(json)
         assertEquals(data!!.hidden_card.rank, "6")
         assertEquals(data.hidden_card.suit, Suit.SPADES)

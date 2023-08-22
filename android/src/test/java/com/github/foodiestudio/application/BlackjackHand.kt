@@ -1,13 +1,13 @@
 package com.github.foodiestudio.application
 
-import com.squareup.moshi.JsonClass
+// 使用动态反射的话，不需要用到这个 @JsonClass
 
-@JsonClass(generateAdapter = true)
+//@JsonClass(generateAdapter = true)
 class BlackjackHand(
     val hidden_card: Card
 )
 
-@JsonClass(generateAdapter = true)
+//@JsonClass(generateAdapter = true)
 class Card(
     val rank: String,
     val suit: Suit
