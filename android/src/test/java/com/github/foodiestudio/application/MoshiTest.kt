@@ -1,17 +1,19 @@
 package com.github.foodiestudio.application
 
 import com.squareup.moshi.FromJson
-import com.squareup.moshi.JsonAdapter
 import com.squareup.moshi.JsonDataException
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.ToJson
+import com.squareup.moshi.adapter
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
+@OptIn(ExperimentalStdlibApi::class)
 class MoshiTest {
+
     @Test
     fun `basic parse json`() {
-       val json = """
+        val json = """
            {
              "hidden_card": {
                "rank": "6",
@@ -31,9 +33,7 @@ class MoshiTest {
        """.trimIndent()
 
         val moshi = Moshi.Builder().build()
-        val jsonAdapter: JsonAdapter<BlackjackHand> = moshi.adapter(BlackjackHand::class.java)
-        // 文档错了？下面这个调用方式不太 work
-//        val jsonAdapter: JsonAdapter<BlackjackHand> = moshi.adapter<BlackjackHand>()
+        val jsonAdapter = moshi.adapter<BlackjackHand>()
 
         val blackjackHand = jsonAdapter.fromJson(json)
         assertEquals(blackjackHand!!.hidden_card.suit, Suit.SPADES)
@@ -55,6 +55,25 @@ class MoshiTest {
         assertEquals(data!!.hidden_card.rank, "6")
         assertEquals(data.hidden_card.suit, Suit.SPADES)
     }
+
+    // 处理 json -> Event 的过程中，会自动尝试 json -> EventJson -> Event 的过程
+    @Test
+    fun `parse json with custom adapter not string`() {
+        val json = """
+            {
+              "title": "Blackjack tournament",
+              "begin_date": "20151010",
+              "begin_time": "17:04"
+            }
+        """.trimIndent()
+        val adapter = Moshi.Builder().add(EventJsonAdapter())
+            .build()
+            .adapter<Event>()
+
+        val event = adapter.fromJson(json)
+        assertEquals(event!!.title, "Blackjack tournament")
+        assertEquals(event!!.beginDateAndTime, "20151010 17:04")
+    }
 }
 
 // 处理缩写
@@ -74,5 +93,24 @@ class CardAdapter {
             'H' -> Card(rank, Suit.HEARTS)
             else -> throw JsonDataException("unkown suit: $card")
         }
+    }
+}
+
+class EventJsonAdapter {
+    @FromJson
+    fun eventFromJson(eventJson: EventJson): Event {
+        return Event(
+            title = eventJson.title,
+            beginDateAndTime = "${eventJson.begin_date} ${eventJson.begin_time}"
+        )
+    }
+
+    @ToJson
+    fun eventToJson(event: Event): EventJson {
+        return EventJson(
+            title = event.title,
+            begin_date = event.beginDateAndTime.substring(0, 8),
+            begin_time = event.beginDateAndTime.substring(9, 14)
+        )
     }
 }
