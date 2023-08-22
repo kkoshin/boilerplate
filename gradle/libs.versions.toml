@@ -9,6 +9,8 @@
 [plugins]
 
 [libraries]
+moshi = "com.squareup.moshi:moshi-kotlin:1.15.0"
+moshi-ksp = "com.squareup.moshi:moshi-kotlin-codegen:1.15.0"
 
 [bundles]
 
