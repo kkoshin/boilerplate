@@ -25,9 +25,9 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("androidLibs") {
-            from("io.github.foodiestudio:libs-versions:2023.01.00")
-            library("showkase", "com.airbnb.android:showkase:1.0.0-beta18")
-            library("showkase-processor", "com.airbnb.android:showkase-processor:1.0.0-beta18")
+            from("io.github.foodiestudio:libs-versions:2023.04.01")
+            library("showkase", "com.airbnb.android:showkase:1.0.2")
+            library("showkase-processor", "com.airbnb.android:showkase-processor:1.0.2")
             library("material", "com.google.android.material:material:1.7.0")
         }
         create("desktopLibs") {
