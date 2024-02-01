@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.gradle.plugin.extraProperties
-
 plugins {
     id("org.jetbrains.compose")
     id("com.android.application")
@@ -16,6 +14,7 @@ dependencies {
     implementation(androidLibs.koin)
     implementation(androidLibs.sql)
     implementation(androidLibs.ctc)
+    implementation(androidLibs.sugar)
     implementation(androidLibs.theme)
     implementation(androidLibs.showkase)
     implementation(androidLibs.material)
@@ -45,7 +44,7 @@ android {
         targetCompatibility = JavaVersion.VERSION_1_8
     }
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = false
         }
     }
