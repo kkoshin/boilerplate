@@ -1,20 +1,14 @@
-package com.github.foodiestudio.application
+package com.github.foodiestudio.application.storage
 
-import android.annotation.TargetApi
 import android.app.Application
-import android.content.ContentResolver
 import android.content.Context
-import android.net.Uri
 import android.os.Build
 import android.os.storage.StorageManager
-import android.provider.DocumentsContract
 import androidx.annotation.RequiresApi
 import androidx.annotation.WorkerThread
+import androidx.core.content.getSystemService
 import java.io.File
-import java.io.FileInputStream
 import java.io.FileOutputStream
-import java.io.InputStream
-
 
 /**
  * 针对仅应用持久化的文件，涉及 File 和 Cache。应用卸载后，这些数据也会同步被删除。
@@ -38,8 +32,12 @@ class AppFileHelper(private val applicationContext: Context) {
     private val internalRoot: File = applicationContext.filesDir
     private val internalCacheRoot: File = applicationContext.cacheDir
 
+    // 不考虑多个外部存储的情况，目前支持SD卡的手机越来越少了
     private val externalRoot: File? = applicationContext.getExternalFilesDir(null)
     private val externalCacheRoot: File? = applicationContext.externalCacheDir
+
+    private val storageManager: StorageManager =
+        applicationContext.getSystemService<StorageManager>()!!
 
     fun requireFilesDir(sensitive: Boolean): File = if (sensitive) {
         internalRoot
@@ -61,13 +59,63 @@ class AppFileHelper(private val applicationContext: Context) {
     }
 
     /**
+     * 将 [requireCacheDir] 目录下 [cacheDir] 文件夹在被系统发起的缓存清理时，仅清除文件夹里的内容，而不删除这个文件夹。
+     *
+     * 这个主要为了区分某些情况下，这个缓存是否被创建过。
+     *
+     * 注意：如果是用户发起的缓存清空，这个文件夹还是会被删除。
+     */
+    fun markCacheDirAsTombstone(cacheDir: File) {
+        storageManager.setCacheBehaviorTombstone(cacheDir, true)
+    }
+
+    /**
+     * 检查当前是否还有足够的空间去创建 [cacheFileInBytes] 大小的缓存文件
+     *
+     * 这里的检查是考虑系统主动清理其他应用的缓存文件的前提下。
+     *
+     * 注意：如果事先不知道这个期望的文件大小，可以尝试立即写入文件，然后在出现 IOException 时将其捕获。
+     *
+     * @param sensitive 对应获取 [internalCacheRoot] 还是 [externalCacheRoot]
+     *
+     * 更多详情见，[官方文档](https://developer.android.com/reference/android/os/storage/StorageManager#getAllocatableBytes(java.util.UUID))
+     */
+    fun isCacheSpaceEnoughToCreate(cacheFileInBytes: Long, sensitive: Boolean): Boolean {
+        val appSpecificUuid = storageManager.getUuidForPath(requireCacheDir(sensitive))
+        return cacheFileInBytes <= storageManager.getAllocatableBytes(appSpecificUuid)
+    }
+
+    /**
+     * 请求系统清除设备上的缓存文件（包括其他应用创建的）
+     *
+     * 请求前，需要先检查 [isCacheSpaceEnoughToCreate]，否则还是会失败。
+     *
+     * 注意，避免太频繁的调用（调用间隔应该大于60秒）
+     *
+     * 具体介绍见，[官方文档](https://developer.android.com/reference/android/os/storage/StorageManager#allocateBytes(java.io.FileDescriptor,%20long))
+     */
+    fun requestClearCacheForCreateFile(file: File, bytes: Long): Result<Unit> {
+        return runCatching {
+            storageManager.allocateBytes(file.outputStream().fd, bytes)
+        }
+    }
+
+    /**
+     * 获取应用缓存的额度（而非当前可用空间），这个值是固定的，不受当前应用的缓存文件夹里的文件大小影响。
+     *
+     * （以Android13的256G存储的手机为例，获取的额度为64MB）额度的机制是，当磁盘空间充足的情况下，是可以创建大于这个额度的文件，
+     * 当磁盘空间不足的情况下，当前应用尝试在缓存文件夹下创建文件时，系统会优先把一些实际缓存使用大小已经超出额度的先清理掉。
+     *
+     * 也就是说，如果当前应用的缓存占用控制在这个额度以下的话，缓存文件将是系统上需要时最后清除的文件。
+     *
+     * 详情见，[官方文档](https://developer.android.com/about/versions/oreo/android-8.0?hl=zh-cn#cache)
+     *
      * @param sensitive 对应获取 [internalCacheRoot] 还是 [externalCacheRoot]
      * @return 剩余 Cache 大小，单位为字节, 如需转为 MB，可以将除以 1024*1024
      */
+    @RequiresApi(Build.VERSION_CODES.O)
     @WorkerThread
     fun getCacheQuotaBytes(sensitive: Boolean): Result<Long> {
-        val storageManager =
-            applicationContext.getSystemService(Context.STORAGE_SERVICE) as StorageManager
         val appSpecificUuid = storageManager.getUuidForPath(requireCacheDir(sensitive))
         return storageManager.runCatching {
             getCacheQuotaBytes(appSpecificUuid)
@@ -98,66 +146,5 @@ class AppFileHelper(private val applicationContext: Context) {
     fun readSensitiveFile(fileName: String): String {
         return applicationContext.openFileInput(fileName).bufferedReader().readLines()
             .joinToString("\n")
-    }
-}
-
-/**
- * 这里只讨论不需要权限请求的前提下。
- * 存储在应用外的共享文件夹中，独立于应用的生命周期，即便应用卸载了，这些文件也不会被删除
- *
- * - 不涉及 Cache
- * - 针对媒体文件需要使用 MediaStore 来处理
- * - 非媒体文件需要采用传统的 SAF 方式（FileProvider 那套）来处理
- */
-@RequiresApi(Build.VERSION_CODES.Q)
-object ExternalStorageHelper {
-
-}
-
-/**
- * 支持对 Virtual File 的处理
- */
-class DocumentFileHelper(private val applicationContext: Context) {
-
-    @TargetApi(Build.VERSION_CODES.N)
-    private fun isVirtualFile(uri: Uri): Boolean {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) return false
-
-        if (!DocumentsContract.isDocumentUri(applicationContext, uri)) {
-            return false
-        }
-
-        applicationContext.contentResolver.query(
-            uri,
-            arrayOf(DocumentsContract.Document.COLUMN_FLAGS),
-            null, null, null
-        )?.use {
-            return if (it.moveToFirst()) {
-                (it.getInt(0) and DocumentsContract.Document.FLAG_VIRTUAL_DOCUMENT) != 0
-            } else {
-                false
-            }
-        } ?: return false
-    }
-
-    private fun getInputStreamForVirtualFile(uri: Uri, mimeTypeFilter: String): InputStream? {
-        val resolver: ContentResolver = applicationContext.contentResolver
-
-        val openableMimeTypes = resolver.getStreamTypes(uri, mimeTypeFilter)
-
-        if (openableMimeTypes.isNullOrEmpty()) {
-            return null
-        }
-
-        return resolver.openTypedAssetFileDescriptor(uri, openableMimeTypes[0], null)
-            ?.createInputStream()
-    }
-
-    // alternativeMimeType 处理 virtualFile 时需要传入的 mimeType，例如，"image/*"
-    fun getInputStream(uri: Uri, alternativeMimeType: String? = null): InputStream? {
-        if (isVirtualFile(uri) && alternativeMimeType != null) {
-            return getInputStreamForVirtualFile(uri, alternativeMimeType)
-        }
-        return applicationContext.contentResolver.openInputStream(uri)
     }
 }
