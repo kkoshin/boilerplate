@@ -1,13 +1,9 @@
 package com.github.foodiestudio.application.storage
 
-import android.annotation.TargetApi
-import android.content.ContentResolver
 import android.content.Context
-import android.net.Uri
 import android.os.Build
-import android.provider.DocumentsContract
 import androidx.annotation.RequiresApi
-import java.io.InputStream
+import com.github.foodiestudio.application.storage.external.MediaFileHelper
 
 /**
  * 这里只讨论不需要权限请求的前提下。
@@ -20,6 +16,8 @@ import java.io.InputStream
  * > MediaStore Uri 和 Document Uri 是可以互转的，可以使用 [getDocumentUri](https://developer.android.com/reference/android/provider/MediaStore#getDocumentUri(android.content.Context,%20android.net.Uri)) 来处理
  */
 @RequiresApi(Build.VERSION_CODES.Q)
-object ExternalStorageHelper {
+class ExternalStorageHelper(applicationContext: Context) {
+    private val mediaFileHelper = MediaFileHelper(applicationContext = applicationContext)
+
 
 }

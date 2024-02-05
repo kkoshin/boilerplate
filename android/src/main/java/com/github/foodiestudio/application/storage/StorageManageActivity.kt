@@ -1,5 +1,7 @@
 package com.github.foodiestudio.application.storage
 
+import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -16,6 +18,14 @@ class StorageManageActivity : ComponentActivity() {
             ApplicationTheme {
                 ScopedStoragePlayground(Modifier.padding(16.dp))
             }
+        }
+    }
+
+    companion object {
+        @JvmStatic
+        fun start(context: Context) {
+            val starter = Intent(context, StorageManageActivity::class.java)
+            context.startActivity(starter)
         }
     }
 }

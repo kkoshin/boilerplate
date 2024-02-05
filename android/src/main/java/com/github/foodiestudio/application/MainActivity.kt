@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.airbnb.android.showkase.annotation.ShowkaseRoot
 import com.airbnb.android.showkase.annotation.ShowkaseRootModule
 import com.airbnb.android.showkase.models.Showkase
+import com.github.foodiestudio.application.storage.StorageManageLauncher
 import com.github.foodiestudio.application.theme.ApplicationTheme
 
 class MainActivity : ComponentActivity() {
@@ -35,6 +36,7 @@ class MainActivity : ComponentActivity() {
                         Button(onClick = { startActivity(Showkase.getBrowserIntent(context)) }) {
                             Text("Browse widgets")
                         }
+                        StorageManageLauncher()
                     }
                 }
             }
