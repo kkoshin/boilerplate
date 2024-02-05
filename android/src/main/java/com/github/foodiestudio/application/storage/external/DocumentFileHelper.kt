@@ -11,7 +11,7 @@ import java.io.InputStream
 /**
  * 支持对 Virtual File 的处理
  */
-class DocumentFileHelper(private val applicationContext: Context) {
+internal class DocumentFileHelper(private val applicationContext: Context) {
 
     @TargetApi(Build.VERSION_CODES.N)
     private fun isVirtualFile(uri: Uri): Boolean {

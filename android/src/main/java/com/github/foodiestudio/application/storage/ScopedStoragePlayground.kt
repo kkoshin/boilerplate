@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.github.foodiestudio.application.storage.external.MediaStoreDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import toast
@@ -47,6 +48,33 @@ fun ScopedStoragePlayground(modifier: Modifier = Modifier) {
         CreatePictureOnAppExternal()
 
         Spacer(Modifier.height(32.dp))
+        VideoInsertButton()
+        VideoQueryButton()
+    }
+}
+
+@Composable
+fun VideoInsertButton(modifier: Modifier = Modifier) {
+    val appContext = LocalContext.current.applicationContext
+    val resolver = appContext.contentResolver
+    Button(onClick = {
+        // TODO(Jiangc):  
+//        val result = MediaStoreDao(resolver).queryVideos(1)
+//        appContext.toast("success: ${result.size}")
+    }) {
+        Text("创建一个视频文件")
+    }
+}
+
+@Composable
+fun VideoQueryButton(modifier: Modifier = Modifier) {
+    val appContext = LocalContext.current.applicationContext
+    val resolver = appContext.contentResolver
+    Button(onClick = {
+        val result = MediaStoreDao(resolver).queryVideos(1)
+        appContext.toast("success: ${result.size}")
+    }) {
+        Text("查询所有自己创建的时长大于1分钟的视频")
     }
 }
 
