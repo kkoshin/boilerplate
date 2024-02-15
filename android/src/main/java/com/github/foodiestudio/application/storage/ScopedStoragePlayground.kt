@@ -1,13 +1,16 @@
 package com.github.foodiestudio.application.storage
 
 import android.app.Activity
+import android.app.RecoverableSecurityException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContract
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -25,22 +28,36 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat.startIntentSenderForResult
+import androidx.core.net.toUri
+import com.github.foodiestudio.application.storage.external.FileMode
+import com.github.foodiestudio.application.storage.external.MediaFileHelper
 import com.github.foodiestudio.application.storage.external.MediaStoreDao
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import toast
 import java.io.File
 
+@Preview(name = "ScopedStorage", group = "Playground")
+@Composable
+fun StorageManageLauncher(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    Button(onClick = { StorageManageActivity.start(context) }) {
+        Text("Storage Manage")
+    }
+}
+
 /**
  * - Android 11：对别的 app 的 cache 文件的访问做了限制，如果要查询剩余空间以及清除 cache.
  * 需要使用 `ACTION_MANAGE_STORAGE`(这个上架的话需要提供额外说明) 和 `ACTION_CLEAR_APP_CACHE`
  * - Android 10: 开始支持 Scoped Storage
  */
-@Preview(name = "ScopedStorage", group = "Playground")
 @Composable
 fun ScopedStoragePlayground(modifier: Modifier = Modifier) {
     Column(modifier.verticalScroll(rememberScrollState())) {
-        ManageAllFileButton()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            ManageAllFileButton()
+        }
         CacheQuota()
         WriteButton()
         ReadButton()
@@ -50,6 +67,63 @@ fun ScopedStoragePlayground(modifier: Modifier = Modifier) {
         Spacer(Modifier.height(32.dp))
         VideoInsertButton()
         VideoQueryButton()
+        SongMoveButton(uri = "todo".toUri())
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            NativeAccessButton()
+        }
+    }
+}
+
+@RequiresApi(Build.VERSION_CODES.Q)
+@Composable
+fun NativeAccessButton(modifier: Modifier = Modifier) {
+    val appContext = LocalContext.current.applicationContext
+    val resolver = appContext.contentResolver
+    val mediaUri = "todo".toUri()
+
+
+    Button(onClick = {
+        MediaFileHelper(appContext).open(mediaUri, FileMode.READ_WRITE)
+            .onSuccess {
+                val result = it?.detachFd()
+                if (result != null) {
+                    // 在 native 端拿着这个指针去读取文件，然后再关闭
+                }
+            }
+            .onFailure {
+                // 每当您的应用需要修改并非由其创建的媒体文件时，都请完成此过程。
+                if (it is SecurityException) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        val recoverableSecurityException =
+                            it as? RecoverableSecurityException ?: throw RuntimeException(
+                                it.message,
+                                it
+                            )
+
+                        val intentSender =
+                            recoverableSecurityException.userAction.actionIntent.intentSender
+
+                        // todo 启动 intentSender
+                    } else {
+                        throw RuntimeException(it.message, it)
+                    }
+                }
+            }
+    }) {
+        Text("Native Button 访问")
+    }
+}
+
+@Composable
+fun SongMoveButton(modifier: Modifier = Modifier, uri: Uri) {
+    val appContext = LocalContext.current.applicationContext
+    val resolver = appContext.contentResolver
+    val newRelativePath = "test/move"
+
+    Button(onClick = {
+        val result = MediaStoreDao(resolver).moveSong(uri, newRelativePath)
+    }) {
+        Text("移动到新的地址")
     }
 }
 
@@ -58,9 +132,10 @@ fun VideoInsertButton(modifier: Modifier = Modifier) {
     val appContext = LocalContext.current.applicationContext
     val resolver = appContext.contentResolver
     Button(onClick = {
-        // TODO(Jiangc):  
-//        val result = MediaStoreDao(resolver).queryVideos(1)
-//        appContext.toast("success: ${result.size}")
+        val result = MediaStoreDao(resolver).insertSong("demo.mp3") {
+            // TODO(Jiangc): 写入文件内容
+        }
+        appContext.toast("success: $result")
     }) {
         Text("创建一个视频文件")
     }
@@ -176,6 +251,7 @@ private class ManageAllFilesAccess : ActivityResultContract<Unit, Uri?>() {
 }
 
 // https://developer.android.com/training/data-storage/manage-all-files
+@RequiresApi(Build.VERSION_CODES.R)
 @Composable
 private fun ManageAllFileButton(modifier: Modifier = Modifier) {
     var isHasStoragePermission by remember {

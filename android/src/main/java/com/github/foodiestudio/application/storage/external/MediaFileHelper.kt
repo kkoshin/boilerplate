@@ -100,6 +100,18 @@ internal class MediaFileHelper(applicationContext: Context) {
             contentResolver.openFileDescriptor(mediaUri, mode.value)
         }
     }
+
+    @RequiresApi(Build.VERSION_CODES.R)
+    fun batchWrite(mediaUriList: List<Uri>) {
+        MediaStore.createWriteRequest(contentResolver, mediaUriList)
+    }
+
+    /**
+     * @param recoverable 是否可恢复, 移动到回收站的话
+     */
+    fun batchDelete(recoverable: Boolean) {
+
+    }
 }
 
 // "r", "w", "wt", "wa", "rw" or "rwt".

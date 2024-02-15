@@ -1,6 +1,7 @@
 package com.github.foodiestudio.application.storage.external
 
 import android.content.ContentResolver
+import android.content.ContentUris
 import android.content.ContentValues
 import android.net.Uri
 import android.os.Environment
@@ -31,8 +32,14 @@ class MediaStoreDao(private val resolver: ContentResolver) {
             }
     }
 
-    fun moveSong(songId: String, newRelativePath: String) {
-        // TODO(Jiangc): 更新 Relative path
+    fun moveSong(songUri: Uri, newRelativePath: String) {
+        MediaStoreUpdateBuilder(resolver).update(songUri) {
+            put(MediaStore.Audio.Media.RELATIVE_PATH, newRelativePath)
+        }
+    }
+
+    fun deleteSong(songUri: Uri) {
+
     }
 
     /**

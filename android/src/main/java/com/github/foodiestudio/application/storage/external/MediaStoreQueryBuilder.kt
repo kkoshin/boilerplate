@@ -85,14 +85,20 @@ class MediaStoreUpdateBuilder(private val resolver: ContentResolver) {
             MediaStore.Audio.Media.EXTERNAL_CONTENT_URI
         }
 
-    fun update(uri: Uri, mediaId: Int, builder: ContentValues.() -> Unit): Int {
+    /**
+     * @param mediaUri 包含 id 的 media Store uri
+     */
+    fun update(mediaUri: Uri, builder: ContentValues.() -> Unit): Int {
+        val id: Long =
+            ContentUris.parseId(mediaUri).takeIf { it != -1L }
+                ?: throw IllegalArgumentException("can't parse id from $mediaUri")
         val newSongDetails = ContentValues().apply {
             builder(this)
         }
         val selection = "${MediaStore.Audio.Media._ID} = ?"
-        val selectionArgs = arrayOf(mediaId.toString())
+        val selectionArgs = arrayOf(id.toString())
         return resolver.update(
-            uri,
+            mediaUri,
             newSongDetails,
             selection,
             selectionArgs
