@@ -1,4 +1,4 @@
-package com.github.foodiestudio.application
+package com.github.foodiestudio.application.common
 
 import logcat.logcat
 

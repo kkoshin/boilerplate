@@ -25,14 +25,15 @@ dependencyResolutionManagement {
     }
     versionCatalogs {
         create("androidLibs") {
-            from(files("./gradle/android.versions.toml"))
+            from("io.github.foodiestudio:libs-versions:2023.04.01")
+            library("showkase", "com.airbnb.android:showkase:1.0.2")
+            library("showkase-processor", "com.airbnb.android:showkase-processor:1.0.2")
+            library("material", "com.google.android.material:material:1.7.0")
         }
         create("desktopLibs") {
             from(files("./gradle/desktop.versions.toml"))
         }
     }
 }
-
-rootProject.name = "application"
 
 include(":android", ":desktop", ":common")

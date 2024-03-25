@@ -18,8 +18,11 @@ dependencies {
     implementation(androidLibs.ctc)
     implementation(androidLibs.theme)
     implementation(androidLibs.showkase)
+    implementation(androidLibs.material)
     ksp(androidLibs.showkase.processor)
-
+    implementation(libs.moshi)
+    ksp(libs.moshi.ksp)
+    debugImplementation(androidLibs.junit)
 //    implementation(androidLibs.compose.destinations.core)
 //    ksp(androidLibs.compose.destinations.ksp)
 }
