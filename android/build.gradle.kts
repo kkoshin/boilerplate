@@ -11,6 +11,8 @@ dependencies {
     implementation(project(":common"))
     implementation(androidLibs.activity.compose)
     implementation(androidLibs.bundles.jetpack)
+    implementation(androidLibs.coil.bom)
+    implementation(androidLibs.koin.bom)
     debugImplementation(androidLibs.bundles.debug)
     implementation(androidLibs.coil)
     implementation(androidLibs.koin)
@@ -19,6 +21,7 @@ dependencies {
     implementation(androidLibs.theme)
     implementation(androidLibs.showkase)
     implementation(androidLibs.material)
+    implementation(androidLibs.accompanist.permissions)
     ksp(androidLibs.showkase.processor)
     implementation(libs.moshi)
     ksp(libs.moshi.ksp)
@@ -41,11 +44,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = false
         }
     }

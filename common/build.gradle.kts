@@ -8,9 +8,12 @@ plugins {
 //version = "1.0-SNAPSHOT"
 
 kotlin {
-    android()
+    androidTarget()
     jvm("desktop") {
-        jvmToolchain(11)
+        jvmToolchain(17)
+    }
+    dependencies {
+        implementation(platform(androidLibs.coil.bom))
     }
     sourceSets {
         val commonMain by getting {
@@ -48,6 +51,7 @@ kotlin {
 }
 
 android {
+    namespace = "com.github.foodiestudio.application.common"
     compileSdk = extra["compileSdk"].toString().toInt()
     sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
     defaultConfig {
@@ -55,7 +59,7 @@ android {
         targetSdk = extra["targetSdk"].toString().toInt()
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 }
