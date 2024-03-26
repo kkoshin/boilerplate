@@ -21,6 +21,7 @@ dependencies {
     implementation(androidLibs.theme)
     implementation(androidLibs.showkase)
     implementation(androidLibs.material)
+    implementation(androidLibs.accompanist.permissions)
     ksp(androidLibs.showkase.processor)
     implementation(libs.moshi)
     ksp(libs.moshi.ksp)
