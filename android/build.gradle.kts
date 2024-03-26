@@ -11,6 +11,8 @@ dependencies {
     implementation(project(":common"))
     implementation(androidLibs.activity.compose)
     implementation(androidLibs.bundles.jetpack)
+    implementation(androidLibs.coil.bom)
+    implementation(androidLibs.koin.bom)
     debugImplementation(androidLibs.bundles.debug)
     implementation(androidLibs.coil)
     implementation(androidLibs.koin)
@@ -41,11 +43,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildTypes {
-        getByName("release") {
+        release {
             isMinifyEnabled = false
         }
     }
