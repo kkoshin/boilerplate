@@ -28,6 +28,8 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation(androidLibs.junit)
+                implementation("org.jetbrains.kotlinx:atomicfu:0.17.2")
             }
         }
         val androidMain by getting {
