@@ -8,6 +8,9 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.concurrent.thread
 import kotlin.system.measureTimeMillis
 
+/**
+ * 多线程并发计数器，需要互斥来保证结果的正确。
+ */
 class ConcurrentCountTest {
 
     // 此用例情况比较简单，为了避免被编译器优化掉，这里可以使用 @Volatile
