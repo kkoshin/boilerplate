@@ -17,7 +17,7 @@ dependencies {
     implementation(androidLibs.coil)
     implementation(androidLibs.koin)
     implementation(androidLibs.sql)
-    implementation(androidLibs.ctc)
+    implementation(androidLibs.sugar)
     implementation(androidLibs.theme)
     implementation(androidLibs.showkase)
     implementation(androidLibs.material)
