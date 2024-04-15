@@ -1,5 +1,6 @@
-package com.github.foodiestudio.application
+package com.github.foodiestudio.application.audio
 
+import android.media.AudioRecord
 import android.media.MediaRecorder
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material.Button
@@ -14,22 +15,29 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import com.github.foodiestudio.sugar.ExperimentalSugarApi
+import com.github.foodiestudio.sugar.notification.toast
 import com.github.foodiestudio.sugar.storage.AppFileHelper
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okio.buffer
+import okio.sink
 import java.io.File
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Preview(name = "record", group = "Playground")
 @Composable
-fun AudioRecordSample(modifier: Modifier = Modifier) {
+fun WaveRecord(modifier: Modifier = Modifier) {
     val recordPermissionState = rememberPermissionState(
         android.Manifest.permission.RECORD_AUDIO
     )
@@ -57,6 +65,8 @@ fun AudioRecordSample(modifier: Modifier = Modifier) {
     }
 }
 
+private val waveConfig = WaveConfig()
+
 @OptIn(ExperimentalSugarApi::class)
 @Composable
 fun RecordButton(modifier: Modifier = Modifier) {
@@ -64,29 +74,21 @@ fun RecordButton(modifier: Modifier = Modifier) {
         mutableStateOf(false)
     }
     val context = LocalContext.current
-    val outputFile = remember {
+    val wavFile = remember {
         val dir = AppFileHelper(context.applicationContext).requireFilesDir(false)
-        File(dir, "testRecordAudio.3gp").apply {
-            createNewFile()
-        }
+        File(dir, "testRecord.wav")
     }
     val mediaRecorder = remember {
-        MediaRecorder(context).apply {
-            setAudioSource(MediaRecorder.AudioSource.MIC)
-            setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-            setOutputFile(outputFile)
-            setAudioEncoder(MediaRecorder.AudioEncoder.DEFAULT)
-            prepare()
-        }
-//        更精细的控制需使用 AudioRecord 方式实现
-//        AudioRecord(
-//            MediaRecorder.AudioSource.MIC,
-//            44100, // 采样率为 44.1 kHz
-//            AudioFormat.CHANNEL_IN_MONO,
-//            AudioFormat.ENCODING_PCM_16BIT,
-//            16
-//        )
+        AudioRecord(
+            MediaRecorder.AudioSource.MIC,
+            waveConfig.sampleRate,
+            waveConfig.channels,
+            waveConfig.audioEncoding,
+            waveConfig.recordBufferSize
+        )
     }
+
+    val scope = rememberCoroutineScope()
 
     DisposableEffect(mediaRecorder) {
         onDispose {
@@ -105,8 +107,43 @@ fun RecordButton(modifier: Modifier = Modifier) {
     } else {
         IconButton(onClick = {
             // start
-            mediaRecorder.start()
+            mediaRecorder.startRecording()
             isRecording = true
+            scope.launch(Dispatchers.IO) {
+                val buffer = ByteArray(waveConfig.recordBufferSize)
+                wavFile.sink().buffer().use { sink ->
+                    while (isRecording) {
+                        val read = mediaRecorder.read(buffer, 0, waveConfig.recordBufferSize)
+                        if (read > 0) {
+                            sink.write(buffer, 0, read)
+                        }
+                    }
+                    sink.flush()
+                }
+                runCatching {
+                    WaveHeaderWriter(
+                        filePath = wavFile.absolutePath,
+                        waveConfig = WaveConfig()
+                    ).writeHeader()
+                }.onSuccess {
+                    withContext(Dispatchers.Main) {
+                        context.toast("save successful.")
+                    }
+                }
+//                runCatching {
+//                    AudioUtil.pcmToWav(
+//                        pcmFile,
+//                        wavFile,
+//                        sampleRate,
+//                        16,
+//                        channelConfig == AudioFormat.CHANNEL_IN_STEREO
+//                    )
+//                }.onSuccess {
+//                    withContext(Dispatchers.Main) {
+//                        context.toast("save successful.")
+//                    }
+//                }
+            }
         }) {
             Icon(Icons.Default.PlayArrow, null)
         }
