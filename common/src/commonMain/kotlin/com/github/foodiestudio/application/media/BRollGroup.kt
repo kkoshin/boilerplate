@@ -124,14 +124,12 @@ fun EffectItem(
                 .width(selectedItemWidth)
                 .height(IntrinsicSize.Min)
         ) {
-            Indicator(modifier = Modifier
-                .fillMaxHeight()
-                .draggable(
-                    orientation = Orientation.Horizontal,
-                    state = rememberDraggableState { delta ->
-                        offsetX += delta
-                    }
-                ))
+            Indicator(modifier = Modifier.fillMaxHeight().draggable(
+                orientation = Orientation.Horizontal,
+                state = rememberDraggableState { delta ->
+                    offsetX += delta
+                }
+            ))
             Text(
                 "XXXX",
                 Modifier
@@ -139,14 +137,12 @@ fun EffectItem(
                     .weight(1f),
                 maxLines = 1,
             )
-            Indicator(modifier = Modifier
-                .fillMaxHeight()
-                .draggable(
-                    orientation = Orientation.Horizontal,
-                    state = rememberDraggableState { delta ->
-                        widthOffset = (widthOffset + delta).coerceAtLeast(-minWidthOffset)
-                    }
-                ))
+            Indicator(modifier = Modifier.fillMaxHeight().draggable(
+                orientation = Orientation.Horizontal,
+                state = rememberDraggableState { delta ->
+                    widthOffset = (widthOffset + delta).coerceAtLeast(-minWidthOffset)
+                }
+            ))
         }
     } else {
         Box(
