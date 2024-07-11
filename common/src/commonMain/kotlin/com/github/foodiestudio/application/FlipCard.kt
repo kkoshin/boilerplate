@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import com.github.foodiestudio.application.common.AsyncImage
 import com.github.foodiestudio.application.common.rememberImagePainter
 import kotlin.math.abs
 
@@ -40,14 +41,17 @@ fun FlipCard() {
                 rotationY = rotationY,
                 rotationZ = rotationZ,
                 front = {
-                    val painter =
-                        rememberImagePainter("https://www.gstatic.com/android/keyboard/emojikitchen/20201001/u1f600/u1f600_u1f642.png")
-                    Image(painter, null, Modifier.size(120.dp, 120.dp), contentScale = ContentScale.Crop)
-                }, back = {
-                    val painter =
-                        rememberImagePainter("https://www.gstatic.com/android/keyboard/emojikitchen/20201001/u1f62d/u1f62d_u1f642.png")
-                    Image(painter, null, Modifier.size(120.dp, 120.dp), contentScale = ContentScale.Crop)
-                }
+                    AsyncImage(
+                        "https://www.gstatic.com/android/keyboard/emojikitchen/20201001/u1f600/u1f600_u1f642.png",
+                        Modifier.size(120.dp, 120.dp),
+                    )
+                },
+                back = {
+                    AsyncImage(
+                        "https://www.gstatic.com/android/keyboard/emojikitchen/20201001/u1f62d/u1f62d_u1f642.png",
+                        Modifier.size(120.dp, 120.dp),
+                    )
+                },
             )
         }
         SlideBar("Horizontal Flip(X Axis)", rotationX, 0.0F..360.0F) {
@@ -67,7 +71,7 @@ private fun SlideBar(
     label: String,
     value: Float,
     valueRange: ClosedFloatingPointRange<Float>,
-    onValueChanged: (Float) -> Unit
+    onValueChanged: (Float) -> Unit,
 ) {
     Column {
         Row {
@@ -87,14 +91,16 @@ private fun DoubleSide(
     rotationZ: Float = 0f,
     cameraDistance: Float = 8f,
     front: @Composable () -> Unit,
-    back: @Composable () -> Unit
+    back: @Composable () -> Unit,
 ) {
-    val isHorizontalFlip: Boolean = (abs(rotationX) % 360).let {
-        it > 90F && it < 270F
-    }
-    val isVerticalFlip: Boolean = (abs(rotationY) % 360).let {
-        it > 90F && it < 270F
-    }
+    val isHorizontalFlip: Boolean =
+        (abs(rotationX) % 360).let {
+            it > 90F && it < 270F
+        }
+    val isVerticalFlip: Boolean =
+        (abs(rotationY) % 360).let {
+            it > 90F && it < 270F
+        }
     if (isHorizontalFlip xor isVerticalFlip) {
         Box(
             Modifier.graphicsLayer(
@@ -103,8 +109,8 @@ private fun DoubleSide(
                 rotationX = rotationX,
                 rotationY = rotationY,
                 rotationZ = -rotationZ,
-                cameraDistance = cameraDistance
-            )
+                cameraDistance = cameraDistance,
+            ),
         ) {
             back()
         }
@@ -117,8 +123,8 @@ private fun DoubleSide(
                     rotationX = rotationX,
                     rotationY = rotationY,
                     rotationZ = rotationZ,
-                    cameraDistance = cameraDistance
-                )
+                    cameraDistance = cameraDistance,
+                ),
         ) {
             front()
         }
